@@ -53,18 +53,47 @@ void process_p1(vector<int> arr) {
     printf("The value left at position zero is: %d \n", arr[0]);
 }
 
-int main() {
+void process_p2(vector<int> arr) {
+    int current_idx = 0;
+    int x, y;
+    while (arr[current_idx] != 99) {
+        int operation = arr[current_idx];
+        if (operation == 1) {
+            x = arr[arr[current_idx + 1]];
+            y = arr[arr[current_idx + 2]];
+            arr[arr[current_idx + 3]] = x + y;
+            current_idx += 4;
+        } else if (operation == 2) {
+            x = arr[arr[current_idx + 1]];
+            y = arr[arr[current_idx + 2]];
+            arr[arr[current_idx + 3]] = x * y;
+            current_idx += 4;
+        } else {
+            break;
+        }
+        printf("==============================\n");
+    }
+    printf("The value left at position zero is: %d \n", arr[0]);
+}
+
+vector<int> array_from_file(string file) {
     fstream newfile;
+    vector<int> arr;
     newfile.open("aoc_day2.txt", ios::in);
     if (newfile.is_open()) {
         string line;
-        vector<int> arr;
         //read input into array
         while (getline(newfile, line, ',')) {
             //printf("%s\n", line.c_str());
             arr.push_back(stoi(line));
         }
         newfile.close();
-        process_p1(arr);
     }
+    return arr;
+}
+
+int main() {
+    vector<int> arr;
+    arr = array_from_file("aoc_day2.txt");
+    process_p1(arr);
 }
