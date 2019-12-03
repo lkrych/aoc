@@ -53,7 +53,9 @@ void process_p1(vector<int> arr) {
     printf("The value left at position zero is: %d \n", arr[0]);
 }
 
-void process_p2(vector<int> arr) {
+int process_p2(vector<int> arr, int a, int b) {
+    arr[1] = a;
+    arr[2] = b;
     int current_idx = 0;
     int x, y;
     while (arr[current_idx] != 99) {
@@ -71,9 +73,8 @@ void process_p2(vector<int> arr) {
         } else {
             break;
         }
-        printf("==============================\n");
     }
-    printf("The value left at position zero is: %d \n", arr[0]);
+    return arr[0];
 }
 
 vector<int> array_from_file(string file) {
@@ -92,8 +93,35 @@ vector<int> array_from_file(string file) {
     return arr;
 }
 
+// p1
+// int main() {
+//     vector<int> arr;
+//     arr = array_from_file("aoc_day2.txt");
+//     process_p1(arr);
+// }
+
 int main() {
+    int x;
+    int y;
+    int ans = 1;
     vector<int> arr;
-    arr = array_from_file("aoc_day2.txt");
-    process_p1(arr);
+    fstream outputfile;
+    outputfile.open("aoc_day2_ans.txt", ios::out);
+
+    for (x = 0; x < 100; x++) {
+        for (y = 0; y < 100; y++) {
+            arr = array_from_file("aoc_day2.txt");
+            ans = process_p2(arr, x , y);
+            //write to file
+            outputfile << ans << ": " << x << ", " << y << "\n"; 
+            if (ans == 19690720) {
+                printf("The noun: %d, The verb: %d\n", x, y);
+                break;
+            }
+        }
+        if (ans == 19690720) {
+            break;
+        }  
+    }
+    outputfile.close();
 }
