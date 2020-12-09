@@ -39,7 +39,6 @@ std::vector<std::string> getInputString(std::string filename) {
 
 std::vector<std::string> splitString(std::string s, std::string delim) {
     std::string token;
-    std::string delimiter = " ";
     size_t pos = 0;
     std::vector<std::string> split;
     while ((pos = s.find(delim)) != std::string::npos) {
@@ -47,6 +46,7 @@ std::vector<std::string> splitString(std::string s, std::string delim) {
         split.push_back(token);
         s.erase(0, pos + delim.length());
     }
+    split.push_back(s);
     return split;
 }
 
