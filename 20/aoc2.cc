@@ -22,11 +22,10 @@ bool validPassword(std::string rules, std::string target, std::string pass) {
             count++;
         }
     }
-    std::cout << rules << " <-- count: " << count << std::endl;
     return count >= lowerBound && count <= upperBound;
 }
 
-std::vector<std::string> invalidPasswords(std::vector<std::string> arr) {
+std::vector<std::string> validPasswords(std::vector<std::string> arr) {
     std::string entry, password, rules, target;
     std::vector<std::string> inv_passwords;
     for(int i = 0; i < arr.size(); i++) {
@@ -41,8 +40,7 @@ std::vector<std::string> invalidPasswords(std::vector<std::string> arr) {
         rules = split[0];
         target = split[1][0];
         password= split[2];
-        if (!validPassword(rules, target, password)) {
-            std::cout << entry << " is invalid!" << std::endl;
+        if (validPassword(rules, target, password)) {
             inv_passwords.push_back(password);
         }
 
@@ -57,6 +55,6 @@ int main() {
     data = getInputString("./input/aoc2.txt");
 
     // use three sum to find the three matching nums
-    std::vector<std::string> invalid_passwords = invalidPasswords(data);
-    std::cout << "There are " << invalid_passwords.size() << " invalid passwords" << std::endl;
+    std::vector<std::string> valid_passwords = validPasswords(data);
+    std::cout << "There are " << valid_passwords.size() << " valid passwords" << std::endl;
 }
