@@ -6,22 +6,6 @@
 #include <string>
 #include <vector>
 
-std::vector<int> getInputInt(std::string filename) {
-    std::ifstream myfile(filename);
-    std::vector<int> input;
-    std::string line;
-    if (myfile.is_open()) {
-        while ( getline (myfile, line) ){
-            int el = std::stoi(line);
-            input.push_back(el);
-        }
-        myfile.close();
-    } else {
-        std::cout << "There was a problem reading from " << filename;
-    }
-    return input;
-}
-
 std::vector<std::string> getInputString(std::string filename) {
     std::ifstream myfile(filename);
     std::vector<std::string> input;
@@ -33,6 +17,19 @@ std::vector<std::string> getInputString(std::string filename) {
         myfile.close();
     } else {
         std::cout << "There was a problem reading from " << filename;
+    }
+    return input;
+}
+
+std::vector<int> getInputInt(std::string filename) {
+    std::vector<int> input;
+    std::vector<std::string> stringInput;
+    
+    stringInput = getInputString(filename);
+    
+    for(int i = 0; i < stringInput.size(); i++) {
+        int el = std::stoi(stringInput[i]);
+        input.push_back(el);
     }
     return input;
 }
