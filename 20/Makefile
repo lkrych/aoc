@@ -7,3 +7,5 @@ day2:
 	${CC} aoc2.cc -o aoc2 ${LDLIBS}
 day3:
 	${CC} aoc3.cc -o aoc3 ${LDLIBS}
+day4:
+	${CC} aoc4.cc -o aoc4 ${LDLIBS}
