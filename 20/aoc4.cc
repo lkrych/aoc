@@ -10,7 +10,6 @@
 // part 1
 // bool validPassport(std::map<std::string, std::string> passport, std::vector<std::string> required) {
 //     // check if all the required fields are in the map
-//     passport["checked"] = true;
 //     std::cout << "checking if passport with " << passport.size() <<" keys is valid" << std::endl;
 //     for (int i = 0; i < required.size(); i++) {
 //         std::string req = required[i];
@@ -25,10 +24,6 @@
 // part 2
 bool validPassport(std::map<std::string, std::string> passport, std::vector<std::string> required) {
     // check if all the required fields are in the map
-    if (passport.size() != 7) {
-        return false;
-    }
-    passport["checked"] = true;
     std::vector<std::string> valid_ecl = {"amb","blu","brn","gry","grn","hzl","oth"};
     for (int i = 0; i < required.size(); i++) {
         std::string req = required[i];
@@ -48,7 +43,7 @@ bool validPassport(std::map<std::string, std::string> passport, std::vector<std:
                 }
             } else if("eyr" == req) {
                 int eyr = std::stoi(item);
-                if (eyr < 2020 || eyr > 2030) {
+                if (eyr < 2020 || eyr > 2030) { 
                     return false;
                 }
             } else if("hgt" == req) {
@@ -56,13 +51,11 @@ bool validPassport(std::map<std::string, std::string> passport, std::vector<std:
                 if (hgt.find("in") != std::string::npos) {
                     int hgtin = std::stoi(item.substr(0, 2));
                     if (hgtin < 59 || hgtin > 76) {
-
                         return false;
                     }
                 } else if (hgt.find("cm") != std::string::npos) {
                     int hgtcm = std::stoi(item.substr(0, 3));
                     if (hgtcm < 150 || hgtcm > 193) {
-
                         return false;
                     }
                 } else {
@@ -105,6 +98,7 @@ int validatePassports(std::vector<std::string> passports, std::vector<std::strin
         std::string row = passports[i];
         if (row.size() == 0) {
             // check to see if the passport is valid
+            current_passport["checked"] = "true";
             if (validPassport(current_passport, req_fields)) {
                 valid++;
             }
@@ -131,8 +125,8 @@ int validatePassports(std::vector<std::string> passports, std::vector<std::strin
             }
         }
     };
-    if ( current_passport.find("checked") == current_passport.end()) {
-        // 
+    //if the passport hasn't been checked... check it
+    if ( current_passport.find("checked") == current_passport.end()) { 
         if (validPassport(current_passport, req_fields)) {
             valid++;
         }
