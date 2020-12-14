@@ -10,12 +10,12 @@ int calculateYeses(std::map<char, int> answers, int group_count) {
     int yeses = 0;
     std::map<char, int>::iterator it;
 
-        for ( it = answers.begin(); it != answers.end(); it++ )
-        {
-            if (it->second == group_count) {
-                yeses++;
-            }
+    for ( it = answers.begin(); it != answers.end(); it++ )
+    {
+        if (it->second == group_count) {
+            yeses++;
         }
+    }
 
     return yeses;
 }
