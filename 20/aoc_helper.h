@@ -47,4 +47,48 @@ std::vector<std::string> splitString(std::string s, std::string delim) {
     return split;
 }
 
+// https://thispointer.com/how-to-remove-substrings-from-a-string-in-c/
+void eraseAllSubStr(std::string & mainStr, const std::string & toErase)
+{
+    size_t pos = std::string::npos;
+    // Search for the substring in string in a loop untill nothing is found
+    while ((pos  = mainStr.find(toErase) )!= std::string::npos)
+    {
+        // If found then erase it from string
+        mainStr.erase(pos, toErase.length());
+    }
+}
+
+std::string removeFromString(std::string s, std::vector<std::string> targets) {
+    for(int i = 0; i < targets.size(); i++) {
+        std::string target = targets[i];
+        eraseAllSubStr(s, target);
+    }
+    return s;
+}
+
+std::string lstrip(std::string s) {
+    int idx = 0;
+    while (!isalpha(s[idx])) {
+        idx++;
+    }
+    return s.substr(idx, s.size() - idx);
+}
+
+std::string rstrip(std::string s) {
+    int last_idx = s.size() - 1;
+    while (!isalpha(s[last_idx])) {
+        last_idx--;
+    }
+    return s.substr(0,last_idx + 1);
+}
+
+std::string strip(std::string s) {
+    std::string strip = lstrip(s);
+    strip = rstrip(strip);
+    return strip;
+}
+
+
+
 #endif 
