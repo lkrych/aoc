@@ -69,7 +69,7 @@ std::string removeFromString(std::string s, std::vector<std::string> targets) {
 
 std::string lstrip(std::string s) {
     int idx = 0;
-    while (!isalpha(s[idx])) {
+    while (!isalnum(s[idx])) {
         idx++;
     }
     return s.substr(idx, s.size() - idx);
