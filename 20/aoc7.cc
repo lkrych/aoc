@@ -64,30 +64,30 @@ std::map<std::string, std::vector<std::pair<std::string, int>>> parseBags(std::s
         if (noBags.find("no other") != std::string::npos) {
             continue;
         }
-        if ( entry.find(stripped) == entry.end() ) {
+        if ( entry.find(parent) == entry.end() ) {
             // not found
-                entry[stripped] = {std::pair<std::string,int> (parent, n)};
+                entry[parent] = {std::pair<std::string,int> (stripped, n)};
         } else {
         // found
-            entry[stripped].push_back(std::pair<std::string,int> (parent, n));
+            entry[parent].push_back(std::pair<std::string,int> (stripped, n));
         }
+
     }
     return entry;
 }
 
-int parentBags( std::map<std::string, std::vector<std::pair<std::string, int>>> adjacency_list, std::string target, std::map<std::string, bool> *parent_check) {
+int childrenBags( std::map<std::string, std::vector<std::pair<std::string, int>>> adjacency_list, std::string target, int bagN) {
     int count = 0;
-    std::vector<std::pair<std::string, int>> parents = adjacency_list[target];
-
-    for (int i = 0; i < parents.size(); i++) {
-        std::string parent = parents[i].first;
-        if (parent_check->find(parent) == parent_check->end()) {
-            count++;
-            (*parent_check)[parent] = true;
-            count += parentBags(adjacency_list, parent, parent_check);
-        }
+    std::vector<std::pair<std::string, int>> children = adjacency_list[target];
+    std::cout << target << " count is " << bagN << std::endl;
+    count += bagN;
+    for (int i = 0; i < children.size(); i++) {
+        std::string child = children[i].first;
+        std::cout << "There are " << children[i].second << " " << child << " bags in a " << target << std::endl;
+        int nestedBags = childrenBags(adjacency_list, child, children[i].second);
+        std::cout << target << " contains " <<  nestedBags << std::endl;
+        count +=  bagN * nestedBags;
     }
-    
     return count;
 }
 
@@ -100,17 +100,11 @@ int baggageClaim(std::vector<std::string> arr, std::string target) {
         std::map<std::string, std::vector<std::pair<std::string, int>>>::iterator it;
         for ( it = entry.begin(); it != entry.end(); it++ )
         {
-            if ( adjacency_list.find(it->first) == adjacency_list.end() ) {
-            // not found
-                adjacency_list[it->first] = it->second;
-            } else {
-            // found. add elements from entry to the adjacency list
-                adjacency_list[it->first].insert(adjacency_list[it->first].end(), it->second.begin(), it->second.end());
-            }
+            adjacency_list[it->first] = it->second;
         }
     }    
     std::map<std::string, bool> parent_check;
-    int bags = parentBags(adjacency_list, target, &parent_check);
+    int bags = childrenBags(adjacency_list, target, 1);
     return bags;
 }
 
@@ -121,5 +115,6 @@ int main() {
     data = getInputString("./input/aoc7.txt");
 
     int parentBags = baggageClaim(data, "shiny gold");
-    std::cout << "the number of parent bags " << parentBags << std::endl;
+    //need to subtract one to not count the target
+    std::cout << "the number of parent bags " << parentBags - 1 << std::endl;
 }
