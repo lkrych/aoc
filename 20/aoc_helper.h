@@ -21,14 +21,14 @@ std::vector<std::string> getInputString(std::string filename) {
     return input;
 }
 
-std::vector<int> getInputInt(std::string filename) {
-    std::vector<int> input;
+std::vector<long> getInputLong(std::string filename) {
+    std::vector<long> input;
     std::vector<std::string> stringInput;
     
     stringInput = getInputString(filename);
     
     for(int i = 0; i < stringInput.size(); i++) {
-        int el = std::stoi(stringInput[i]);
+        int el = std::stol(stringInput[i]);
         input.push_back(el);
     }
     return input;
