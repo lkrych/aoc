@@ -89,6 +89,15 @@ std::string strip(std::string s) {
     return strip;
 }
 
+std::vector<std::vector<char>> copyMatrix(std::vector<std::vector<char>> arr) {
+    std::vector<std::vector<char>> matrix = {};
+    for(int i = 0; i < arr.size(); i++) {
+        std::vector<char> row = arr[i];
+        std::vector<char> copy = {row.begin(), row.end()};
+        matrix.push_back(copy);
+    }
+    return matrix;
+}
 
 
 #endif 
