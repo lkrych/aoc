@@ -99,5 +99,7 @@ std::vector<std::vector<char>> copyMatrix(std::vector<std::vector<char>> arr) {
     return matrix;
 }
 
+// https://stackoverflow.com/a/38251268/4458404
+int mod(int a, int b) { return (a % b + b) % b; }
 
 #endif 
