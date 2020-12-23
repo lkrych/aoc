@@ -8,8 +8,7 @@
 #include "aoc_helper.h"
 
 // compile instructions into map
-std::map<char, int> runDirections(std::vector<std::pair<char, int>> parsedData) {
-    std::map<char, int> directionsMap;
+int runDirections(std::vector<std::pair<char, int>> parsedData) {
     std::map<char, int> dirToNum = {
         {'N', 0},
         {'E', 1},
@@ -23,51 +22,205 @@ std::map<char, int> runDirections(std::vector<std::pair<char, int>> parsedData) 
         {3, 'W'},
     };
     //initial starting state from prompt
-    char currentDirection = 'E';
+    //keeps track of direction and magnitude
+    std::pair<char, int> currentWaypointHorizontal = std::pair<char, int>('E', 10);
+    std::pair<char, int> currentWaypointVertical = std::pair<char, int>('N', 1);
+    int horizontal = 0;
+    int vertical = 0;
+
     for (int i = 0; i < parsedData.size(); i++) {
         std::pair<char, int> el = parsedData[i];
-        
+        // make sure the directions align with the magnitude
+        if (currentWaypointVertical.first == 'N' && currentWaypointVertical.second < 0) {
+            currentWaypointVertical.second *= -1;
+        }
+        if (currentWaypointHorizontal.first == 'E' && currentWaypointHorizontal.second < 0) {
+            currentWaypointHorizontal.second *= -1;
+        }
+         if (currentWaypointVertical.first == 'S' && currentWaypointVertical.second > 0) {
+            currentWaypointVertical.second *= -1;
+        }
+        if (currentWaypointHorizontal.first == 'W' && currentWaypointHorizontal.second > 0) {
+            currentWaypointHorizontal.second *= -1;
+        }
+
+        std::cout << "-----------------" << std::endl;
+        std::cout << "Directions: " << el.first << " , " << el.second << std::endl;
+        std::cout << "WPHorizontal: " << currentWaypointHorizontal.first << " , " << currentWaypointHorizontal.second << std::endl;
+        std::cout << "WPVertical: " << currentWaypointVertical.first << " , " << currentWaypointVertical.second << std::endl;
+        std::cout << "h: " << horizontal << std::endl;
+        std::cout << "v: " << vertical << std::endl;
+        std::cout << "-----------------" << std::endl;
+       
+        char hdir = currentWaypointHorizontal.first;
+        char vdir = currentWaypointVertical.first;
+        int hval = currentWaypointHorizontal.second;
+        int vval = currentWaypointVertical.second;
         // change directions
         if (el.first == 'L') {
             //counterclockwise
-            int currentIntDirection = dirToNum[currentDirection];
             if (el.second == 90) {
-                currentIntDirection -= 1;
+                //flip magnitude
+                int temp = currentWaypointVertical.second;
+                currentWaypointVertical.second = currentWaypointHorizontal.second;
+                currentWaypointHorizontal.second = temp;
+                //flip dir
+                if (hdir == 'E') {
+                    if (vdir == 'N') {
+                        currentWaypointHorizontal.first = 'W';
+                        currentWaypointHorizontal.second *= -1;
+                    } else {
+                        currentWaypointVertical.first = 'N';
+                        currentWaypointVertical.second *= -1;
+                    }  
+                } else if (hdir == 'W') {
+                    if (vdir == 'N') {
+                        currentWaypointVertical.first = 'S';
+                        currentWaypointVertical.second *= -1;
+                    } else {
+                        currentWaypointHorizontal.first = 'E';
+                        currentWaypointHorizontal.second *= -1;
+                    }  
+                }
+
             } else if (el.second == 180) {
-                currentIntDirection -= 2;
+                if (hdir == 'E') {
+                    currentWaypointHorizontal.first = 'W';
+                } else if (hdir == 'W') {
+                    currentWaypointHorizontal.first = 'E';
+                }
+                if (vdir == 'N') {
+                    currentWaypointVertical.first = 'S';
+                } else if (vdir == 'S') {
+                    currentWaypointVertical.first = 'N';
+                }
+
+                currentWaypointHorizontal.second *= -1;
+                currentWaypointVertical.second *= -1;
             } else if (el.second == 270) {
-                currentIntDirection -= 3;
+                //flip magnitude
+                int temp = currentWaypointVertical.second;
+                currentWaypointVertical.second = currentWaypointHorizontal.second;
+                currentWaypointHorizontal.second = temp;
+                //flip dir
+                if (hdir == 'E') {
+                    if (vdir == 'N') {
+                        currentWaypointVertical.first = 'S';
+                        currentWaypointVertical.second *= -1;
+                    } else {
+                        currentWaypointHorizontal.first = 'W';
+                        currentWaypointHorizontal.second *= -1;
+                    }  
+                } else if (hdir == 'W') {
+                    if (vdir == 'N') {
+                        currentWaypointHorizontal.first = 'E';
+                        currentWaypointHorizontal.second *= -1;
+                    } else {
+                        currentWaypointVertical.first = 'N';
+                        currentWaypointVertical.second *= -1;
+                    }  
+                }
             }
-            currentIntDirection = mod(currentIntDirection, 4);
-            currentDirection = numToDir[currentIntDirection];
+            
             continue;
         } else if (el.first == 'R') {
             //clockwise
-            int currentIntDirection = dirToNum[currentDirection];
             if (el.second == 90) {
-                currentIntDirection += 1;
+                //flip magnitude
+                int temp = currentWaypointVertical.second;
+                currentWaypointVertical.second = currentWaypointHorizontal.second;
+                currentWaypointHorizontal.second = temp;
+                //flip dir
+                if (hdir == 'E') {
+                    if (vdir == 'N') {
+                        currentWaypointVertical.first = 'S';
+                        currentWaypointVertical.second *= -1;
+                    } else {
+                        currentWaypointHorizontal.first = 'W';
+                        currentWaypointHorizontal.second *= -1;
+                    }  
+                } else if (hdir == 'W') {
+                    if (vdir == 'N') {
+                        currentWaypointHorizontal.first = 'E';
+                        currentWaypointHorizontal.second *= -1;
+                    } else {
+                        currentWaypointVertical.first = 'N';
+                        currentWaypointVertical.second *= -1;
+                    }  
+                }
+                
             } else if (el.second == 180) {
-                currentIntDirection += 2;
+                std::cout << "R 180 with " << hdir << " " << vdir << std::endl;
+                if (hdir == 'E') {
+                    currentWaypointHorizontal.first = 'W';
+                } else if (hdir == 'W') {
+                    currentWaypointHorizontal.first = 'E';
+                }
+                if (vdir == 'N') {
+                    currentWaypointVertical.first = 'S';
+                } else if (vdir == 'S') {
+                    currentWaypointVertical.first = 'N';
+                }
+                currentWaypointHorizontal.second *= -1;
+                currentWaypointVertical.second *= -1;
             } else if (el.second == 270) {
-                currentIntDirection += 3;
+                //flip magnitude
+                int temp = currentWaypointVertical.second;
+                currentWaypointVertical.second = currentWaypointHorizontal.second;
+                currentWaypointHorizontal.second = temp;
+                //flip dir
+                if (hdir == 'E') {
+                    if (vdir == 'N') {
+                        currentWaypointHorizontal.first = 'W';
+                        currentWaypointHorizontal.second *= -1;
+                    } else {
+                        currentWaypointVertical.first = 'N';
+                        currentWaypointVertical.second *= -1;
+                    }  
+                } else if (hdir == 'W') {
+                    if (vdir == 'N') {
+                        currentWaypointVertical.first = 'S';
+                        currentWaypointVertical.second *= -1;
+                    } else {
+                        currentWaypointHorizontal.first = 'E';
+                        currentWaypointHorizontal.second *= -1;
+                    }  
+                }
+                
             }
-            currentIntDirection = mod(currentIntDirection, 4);
-            currentDirection = numToDir[currentIntDirection];
+            
             continue;
         } else if (el.first == 'F') {
-            // std::cout << currentDirection << std::endl;
-            directionsMap[currentDirection] += el.second;
+            // this is the only place where the ship actually moves
+            horizontal += (el.second * currentWaypointHorizontal.second);
+            vertical += (el.second * currentWaypointVertical.second);
             continue;
         }
-
         // if directions equal N,S,E, or W
-        if (directionsMap.find(el.first) != directionsMap.end()) {
-            directionsMap[el.first] += el.second;
-        } else {
-            directionsMap[el.first] = el.second;
+        if (el.first == 'N') {
+            currentWaypointVertical.second += el.second;
+            if (currentWaypointVertical.second > 0) {
+                currentWaypointVertical.first = 'N';
+            }
+        } else if (el.first == 'S') {
+            currentWaypointVertical.second -= el.second;
+            if (currentWaypointVertical.second < 0) {
+                currentWaypointVertical.first = 'S';
+            }
+        } else if (el.first == 'E') {
+            currentWaypointHorizontal.second += el.second;
+            if (currentWaypointHorizontal.second > 0) {
+                currentWaypointHorizontal.first = 'E';
+            }
+        } else if (el.first == 'W') {
+            currentWaypointHorizontal.second -= el.second;
+            if (currentWaypointHorizontal.second < 0) {
+                currentWaypointHorizontal.first = 'W';
+            }
         }
+
     }
-    return directionsMap;
+    return abs(vertical) + abs(horizontal);
 }
 
 // organize raw instructions into pairs
@@ -87,26 +240,9 @@ int manhatDist(std::vector<std::string> data) {
     //decode input
     std::vector<std::pair<char, int>> parsed = parseDirections(data);
     //run directions
-    std::map<char, int> directionMap = runDirections(parsed);
-    std::map<char, int>::iterator it;
-    int vertical = 0;
-    int horizontal = 0;
-    for (it = directionMap.begin(); it != directionMap.end(); it++)
-    {
-        std::cout << it->first << ", " << it->second << std::endl;
-        if (it->first == 'N') {
-            vertical += it->second;
-        } else if (it->first == 'S') {
-            vertical -= it->second;
-        } else if (it->first == 'E') {
-            horizontal += it->second;
-        } else if (it->first == 'W') {
-            horizontal -= it->second;
-        }
-    }
-    return abs(vertical) + abs(horizontal);
+    int manhattan = runDirections(parsed);
+    return manhattan;
 
-    //return
 }
 
 int main() {
