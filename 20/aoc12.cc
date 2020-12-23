@@ -68,18 +68,14 @@ int runDirections(std::vector<std::pair<char, int>> parsedData) {
                 if (hdir == 'E') {
                     if (vdir == 'N') {
                         currentWaypointHorizontal.first = 'W';
-                        currentWaypointHorizontal.second *= -1;
                     } else {
                         currentWaypointVertical.first = 'N';
-                        currentWaypointVertical.second *= -1;
                     }  
                 } else if (hdir == 'W') {
                     if (vdir == 'N') {
                         currentWaypointVertical.first = 'S';
-                        currentWaypointVertical.second *= -1;
                     } else {
                         currentWaypointHorizontal.first = 'E';
-                        currentWaypointHorizontal.second *= -1;
                     }  
                 }
 
@@ -95,8 +91,6 @@ int runDirections(std::vector<std::pair<char, int>> parsedData) {
                     currentWaypointVertical.first = 'N';
                 }
 
-                currentWaypointHorizontal.second *= -1;
-                currentWaypointVertical.second *= -1;
             } else if (el.second == 270) {
                 //flip magnitude
                 int temp = currentWaypointVertical.second;
@@ -106,18 +100,14 @@ int runDirections(std::vector<std::pair<char, int>> parsedData) {
                 if (hdir == 'E') {
                     if (vdir == 'N') {
                         currentWaypointVertical.first = 'S';
-                        currentWaypointVertical.second *= -1;
                     } else {
                         currentWaypointHorizontal.first = 'W';
-                        currentWaypointHorizontal.second *= -1;
                     }  
                 } else if (hdir == 'W') {
                     if (vdir == 'N') {
                         currentWaypointHorizontal.first = 'E';
-                        currentWaypointHorizontal.second *= -1;
                     } else {
                         currentWaypointVertical.first = 'N';
-                        currentWaypointVertical.second *= -1;
                     }  
                 }
             }
@@ -134,18 +124,14 @@ int runDirections(std::vector<std::pair<char, int>> parsedData) {
                 if (hdir == 'E') {
                     if (vdir == 'N') {
                         currentWaypointVertical.first = 'S';
-                        currentWaypointVertical.second *= -1;
                     } else {
                         currentWaypointHorizontal.first = 'W';
-                        currentWaypointHorizontal.second *= -1;
                     }  
                 } else if (hdir == 'W') {
                     if (vdir == 'N') {
                         currentWaypointHorizontal.first = 'E';
-                        currentWaypointHorizontal.second *= -1;
                     } else {
                         currentWaypointVertical.first = 'N';
-                        currentWaypointVertical.second *= -1;
                     }  
                 }
                 
@@ -161,8 +147,6 @@ int runDirections(std::vector<std::pair<char, int>> parsedData) {
                 } else if (vdir == 'S') {
                     currentWaypointVertical.first = 'N';
                 }
-                currentWaypointHorizontal.second *= -1;
-                currentWaypointVertical.second *= -1;
             } else if (el.second == 270) {
                 //flip magnitude
                 int temp = currentWaypointVertical.second;
@@ -172,18 +156,14 @@ int runDirections(std::vector<std::pair<char, int>> parsedData) {
                 if (hdir == 'E') {
                     if (vdir == 'N') {
                         currentWaypointHorizontal.first = 'W';
-                        currentWaypointHorizontal.second *= -1;
                     } else {
                         currentWaypointVertical.first = 'N';
-                        currentWaypointVertical.second *= -1;
                     }  
                 } else if (hdir == 'W') {
                     if (vdir == 'N') {
                         currentWaypointVertical.first = 'S';
-                        currentWaypointVertical.second *= -1;
                     } else {
                         currentWaypointHorizontal.first = 'E';
-                        currentWaypointHorizontal.second *= -1;
                     }  
                 }
                 
