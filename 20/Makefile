@@ -27,3 +27,5 @@ day12:
 	${CC} aoc12.cc -o aoc12 ${LDLIBS}
 day13:
 	${CC} aoc13.cc -o aoc13 ${LDLIBS}
+day14:
+	${CC} aoc14.cc -o aoc14 ${LDLIBS}
