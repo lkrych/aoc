@@ -26,9 +26,22 @@ def boarding_pass(data):
             highest_seat_id = seat_id
     return highest_seat_id
 
+def boarding_pass2(data):
+    seats = []
+    for line in data:
+        line = line.strip()
+        seat_id = get_seat_id(line)
+        seats.append(seat_id)
+    seats.sort()
+    last_seat = seats[0]
+    for i in range(1, len(seats)):
+        curr_seat = seats[i]
+        if curr_seat - last_seat > 1:
+            return curr_seat - 1
+        last_seat = curr_seat
 
 if __name__ == "__main__":
     text_file = open("../input/aoc5.txt", "r")
     string_data = text_file.readlines()
-    ans = boarding_pass(string_data)
+    ans = boarding_pass2(string_data)
     print("the boarding_pass ID is {}".format(ans))
