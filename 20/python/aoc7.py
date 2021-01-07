@@ -1,12 +1,10 @@
 def count_parents(lug_map, target):
-    print(lug_map)
     to_search = [target]
     prospective_parents = {}
     count = 0
     while len(to_search) > 0:
         current_target = to_search.pop()
         if current_target in lug_map:
-            print("{} has parents {}".format(current_target, lug_map[current_target]))
             targets = lug_map[current_target]
         else:
             continue
@@ -43,4 +41,4 @@ if __name__ == "__main__":
     text_file = open("../input/aoc7.txt", "r")
     string_data = text_file.readlines()
     ans = luggage(string_data)
-    print("the number of customs questions is {}".format(ans))
+    print("the number of containing bags is {}".format(ans))
