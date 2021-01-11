@@ -44,7 +44,7 @@ def process2(line, current_state, already_tested):
     sign = split[1][0]
     amount = int(split[1][1:])
     #debug
-    print("action: {}, sign: {}, amt: {}, idx: {}".format(action, sign, amount, idx))
+    # print("action: {}, sign: {}, amt: {}, idx: {}".format(action, sign, amount, idx))
     #actions
     if action == "acc":
         if sign == "+":
@@ -101,8 +101,8 @@ def halting2(data):
         if testing != current_state.testing:
             # we've started testing a path
             # save the state
-            print("we've started testing")
-            saved_state.idx_map = current_state.idx_map
+            # print("we've started testing")
+            saved_state.idx_map = current_state.idx_map.copy()
             saved_state.acc = current_state.acc
             saved_state.idx = current_state.idx
             # keep track of the testing
@@ -112,8 +112,9 @@ def halting2(data):
         if new_idx in current_state.idx_map:
             # we've encountered an infinite loop
             # reset the state
-            print("we've encountered an infinite loop")
-            current_state.idx_map = saved_state.idx_map
+            # print("we've encountered an infinite loop")
+            # print("old index map is {}".format(saved_state.idx_map))
+            current_state.idx_map = saved_state.idx_map.copy()
             current_state.acc = saved_state.acc
             current_state.idx = saved_state.idx
             current_state.testing = False
@@ -122,7 +123,7 @@ def halting2(data):
             current_state.idx_map[new_idx] = True
             current_state.acc = new_acc
             current_state.idx = new_idx
-
+    return current_state.acc
 
 
 if __name__ == "__main__":
