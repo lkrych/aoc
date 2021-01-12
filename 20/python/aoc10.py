@@ -22,9 +22,31 @@ def joltage(data):
     three_j += 1
     return three_j * one_j
 
+def calculate_combos(el, map):
+    combos = 0
+    diff_one, diff_two, diff_three = el - 1, el - 2, el - 3
+    if diff_one in map:
+        combos += map[diff_one]
+    if diff_two in map:
+        combos += map[diff_two]
+    if diff_three in map:
+        combos += map[diff_three]
+    map[el] = combos
+    return map
+
+def joltage2(data):
+    data.sort()
+    last_el = max(data) + 3
+    data.append(last_el)
+    combos = {0: 1}
+    for el in data:
+        combos = calculate_combos(el, combos)
+    
+    return combos[last_el]
+
 if __name__ == "__main__":
     text_file = open("../input/aoc10.txt", "r")
     string_data = text_file.readlines()
     data = list(map(lambda x: int(x), string_data))
-    ans = joltage(data)
-    print("the product of three_j and one_j differences is {}".format(ans))
+    ans = joltage2(data)
+    print("the total number of distinct ways to arrange the adapters is {}".format(ans))
