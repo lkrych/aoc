@@ -27,5 +27,5 @@ def memory_game(data, target_idx):
 if __name__ == "__main__":
     text_file = open("../input/aoc15.txt", "r")
     string_data = text_file.readlines()
-    ans = memory_game(string_data, 2020)
+    ans = memory_game(string_data, 30000000)
     print(f"the 2020th value is {ans}")
