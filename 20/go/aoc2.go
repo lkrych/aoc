@@ -26,7 +26,7 @@ func validPasswords(data []string) int {
 		password := split[2]
 		char := split[1][0]
 		countRange := split[0]
-		if isPasswordValid(password, char, countRange) {
+		if isPasswordValid2(password, char, countRange) {
 			valid++
 		}
 	}
@@ -56,6 +56,24 @@ func isPasswordValid(pass string, targetChar byte, countRange string) bool {
 	}
 
 	if targetCount <= high && targetCount >= low {
+		return true
+	}
+	return false
+
+}
+
+func isPasswordValid2(pass string, targetChar byte, countRange string) bool {
+	splitRange := strings.Split(countRange, "-")
+	low, err := strconv.Atoi(splitRange[0])
+	if err != nil {
+		fmt.Printf("There was an error converting the low range in %s \n", countRange)
+	}
+	high, err := strconv.Atoi(splitRange[1])
+	if err != nil {
+		fmt.Printf("There was an error converting the high range in %s \n", countRange)
+	}
+	// XOR
+	if (pass[low-1] == targetChar) != (pass[high-1] == targetChar) {
 		return true
 	}
 	return false
