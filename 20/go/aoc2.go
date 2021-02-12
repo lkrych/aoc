@@ -6,14 +6,14 @@ import (
 	"strings"
 )
 
-func main() {
-	data, err := ReadFile("../input/aoc2.txt")
-	if err != nil {
-		fmt.Printf("readFile failed: %v\n", err)
-	}
-	ans := validPasswords(data)
-	fmt.Printf("There are %d valid passwords\n", ans)
-}
+// func main() {
+// 	data, err := ReadFile("../input/aoc2.txt")
+// 	if err != nil {
+// 		fmt.Printf("readFile failed: %v\n", err)
+// 	}
+// 	ans := validPasswords(data)
+// 	fmt.Printf("There are %d valid passwords\n", ans)
+// }
 
 func validPasswords(data []string) int {
 	valid := 0
