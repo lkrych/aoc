@@ -7,23 +7,28 @@ func main() {
 	if err != nil {
 		fmt.Printf("readFile failed: %v\n", err)
 	}
-	tobogganDirs := []int{3, 1}
-	ans := tobogganPath(data, tobogganDirs[0], tobogganDirs[1])
+	ans := 1
+	tobogganDirs := [][]int{{3, 1}, {1, 1}, {5, 1}, {7, 1}, {1, 2}}
+	for _, tDir := range tobogganDirs {
+		ans *= tobogganPath(data, tDir[0], tDir[1])
+	}
 	fmt.Printf("There trees encountered are %d \n", ans)
 }
 
 func tobogganPath(data []string, xVel int, yVel int) int {
-	xPos := 0
+	xPos, yPos := 0, 0
 	treeCount := 0
-	for _, row := range data {
-		fmt.Printf("xPos: %d\n", xPos)
+
+	for yPos < len(data) {
+		row := data[yPos]
 		if len(row) < 1 {
-			continue
+			break
 		}
 		if row[xPos] == '#' {
 			treeCount++
 		}
 		xPos += xVel
+		yPos += yVel
 		// the map is stable so if we reach the end of the row, we just wrap back around
 		xPos = xPos % len(row)
 	}
