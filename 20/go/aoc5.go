@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 func main() {
 	data, err := ReadFile("../input/aoc5.txt")
@@ -8,9 +11,12 @@ func main() {
 		fmt.Printf("readFile failed: %v\n", err)
 	}
 
-	ans := highestSeatId(data)
+	// ans := highestSeatId(data)
 
-	fmt.Printf("The highest seat ID is %d \n", ans)
+	// fmt.Printf("The highest seat ID is %d \n", ans)
+	ans := mySeatId(data)
+
+	fmt.Printf("My seat ID is %d \n", ans)
 }
 
 func highestSeatId(data []string) int {
@@ -27,6 +33,30 @@ func highestSeatId(data []string) int {
 	return highestSeatId
 }
 
+func mySeatId(data []string) int {
+	seatIds := make([]int, 0)
+	for _, seat := range data {
+		if len(seat) < 1 {
+			continue
+		}
+		seatId := seatId(seat)
+		seatIds = append(seatIds, seatId)
+	}
+	sort.Ints(seatIds)
+
+	for i, seatId := range seatIds {
+		if i == 0 || i == len(seatIds)-1 {
+			//skip first and last indices
+			continue
+		}
+		diff := seatIds[i] - seatIds[i-1]
+		if diff > 1 {
+			return seatId - 1
+		}
+	}
+	return 0
+}
+
 func seatId(seatCode string) int {
 	// BBFFBBFRLL
 	row := seatCode[:7]
@@ -35,7 +65,6 @@ func seatId(seatCode string) int {
 }
 
 func seatBinary(seatCode string, seatType string) int {
-	fmt.Println("seatCode: ", seatCode)
 	lowerIdx := 0
 	upperIdx := 7
 	if seatType == "row" {
@@ -43,21 +72,25 @@ func seatBinary(seatCode string, seatType string) int {
 	}
 	for i, c := range seatCode {
 		diff := (upperIdx - lowerIdx + 1) / 2
-		fmt.Println("upper: ", upperIdx)
-		fmt.Println("lower: ", lowerIdx)
+		if i == len(seatCode)-1 {
+			break
+		}
+		// cut down options
 		switch c {
 		case 'F', 'L':
-			//take lower half
-			if i < len(seatCode)-1 {
-				upperIdx -= diff
-			}
+			upperIdx -= diff
 		case 'B', 'R':
-			//take upper half
-			if i < len(seatCode)-1 {
-				lowerIdx += diff
-			}
+			lowerIdx += diff
 		}
 	}
-	fmt.Println("seatBinary: ", upperIdx+lowerIdx/2)
-	return upperIdx + lowerIdx/2
+	lastChar := seatCode[len(seatCode)-1]
+	seatBinary := 0
+	switch lastChar {
+	case 'F', 'L':
+		seatBinary = lowerIdx
+	case 'B', 'R':
+		seatBinary = upperIdx
+	}
+	return seatBinary
+
 }
