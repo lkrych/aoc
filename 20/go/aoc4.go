@@ -7,16 +7,16 @@ import (
 	"strings"
 )
 
-func main() {
-	data, err := ReadFile("../input/aoc4.txt")
-	if err != nil {
-		fmt.Printf("readFile failed: %v\n", err)
-	}
+// func main() {
+// 	data, err := ReadFile("../input/aoc4.txt")
+// 	if err != nil {
+// 		fmt.Printf("readFile failed: %v\n", err)
+// 	}
 
-	ans := validPassports(data)
+// 	ans := validPassports(data)
 
-	fmt.Printf("The number of valid passports is %d \n", ans)
-}
+// 	fmt.Printf("The number of valid passports is %d \n", ans)
+// }
 
 func validPassports(data []string) int {
 	valid := 0
