@@ -30,8 +30,31 @@ def product_position(input):
     
     return h_pos * v_pos
 
+#part 2:
+# down X increases your aim by X units.
+# up X decreases your aim by X units.
+# forward X does two things:
+#     It increases your horizontal position by X units.
+#     It increases your depth by your aim multiplied by X.
+
+def product_aim(input):
+    aim = 0
+    h_pos = 0
+    v_pos = 0
+    for line in input:
+        dir = line[0]
+        mag = line[1]
+        if dir == "forward":
+            h_pos += mag
+            v_pos += (aim * mag)
+        elif dir == "up":
+            aim -= mag
+        elif dir == "down":
+            aim += mag
+    
+    return h_pos * v_pos
 
 if __name__ == "__main__":
     lines = get_lines("day2.txt")
     input = [process_input(line) for line in lines]
-    print(product_position(input))
+    print(product_aim(input))
