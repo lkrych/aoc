@@ -1,3 +1,4 @@
+from itertools import filterfalse
 from pathlib import Path
 
 file_dir = Path(__file__).resolve().parent
@@ -31,6 +32,9 @@ def bingo(lines):
     # catch the board that's being filled up at the end
     boards.append(new_board)
 
+    #filter boards to make sure we aren't including empty boards
+    boards = [board for board in boards if len(board) > 0]
+    print(f"boards: {boards}")
 
     # play out bingo
     for bingo_draw in bingo_input.split(","):
@@ -41,13 +45,16 @@ def bingo(lines):
                 board_num = board.get(bingo_draw)
                 board_num[2] = True
                 board[bingo_draw] = board_num
-                if check_if_bingo(board):
-                    # sum all unmarked numbers and multiply by current bingo_draw
-                    sum = 0
-                    for k,v in board.items():
-                        if not v[2]:
-                            sum += int(k)
-                    return sum * int(bingo_draw)
+
+        # part 2 filter until we have the last board
+        if len(boards) == 1:
+            board = boards[0]
+            sum = 0
+            for k,v in board.items():
+                if not v[2]:
+                    sum += int(k)
+            return sum * int(bingo_draw)
+        boards = list(filterfalse(check_if_bingo, boards))
 
 # board is a hash_map of bingo_numbers mapped to a list of (row, col, idx)
 def check_if_bingo(board):
