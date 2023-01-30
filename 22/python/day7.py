@@ -13,11 +13,13 @@ def get_item(db, keys):
         return None
 
 def set_item(db, keys, file_name, file_size):
-    for index in range(1,len(keys)):
-            subitem = get_item(db, keys[:index])
-            if not isinstance(subitem, dict):
-                get_item(db, keys[:index][:-1])[keys[:index][-1]] = {}
-    get_item(db, keys[:-1])[file_name] = file_size
+    print(f"calling set item with: db: {db}, keys: {keys}, file: {file_name}, {file_size}")
+    if file_size == "dir":
+        item = get_item(db, list(keys)[:-1])
+        item[file_name] = {}
+    else:
+        item = get_item(db, list(keys)[:-1])
+        item[file_name] = file_size
     return db
 
 files = {}
@@ -46,6 +48,6 @@ for line in f:
             split = l.split(" ")
             file_size = split[0]
             file_name = split[1]
-            directories = set_item(files, directories, file_name, file_size)
+            files = set_item(files, directories, file_name, file_size)
 
 pprint.pprint(files)
