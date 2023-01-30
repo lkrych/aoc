@@ -6,21 +6,33 @@ import pprint
 file_name = input()
 f = open(f"/Users/lkrych/aoc/22/input/{file_name}.txt", "r")
 
-# https://stackoverflow.com/a/61493389/4458404
+#https://stackoverflow.com/a/23049823/4458404
 def get_item(db, keys):
-    try: return reduce(operator.getitem, keys, db)
-    except Exception as e:
-        return None
-
-def set_item(db, keys, file_name, file_size):
-    print(f"calling set item with: db: {db}, keys: {keys}, file: {file_name}, {file_size}")
-    if file_size == "dir":
-        item = get_item(db, list(keys)[:-1])
-        item[file_name] = {}
-    else:
-        item = get_item(db, list(keys)[:-1])
-        item[file_name] = file_size
+    #iterate through each key and find subitem
+    for key in keys:
+        if key in db:
+            db = db[key]
+        else:
+            db[key] = {}
+            db = db[key]
     return db
+
+# every time we need to set an item, we need to use the elements in the stack to drill down and fetch the item
+def set_item(db, keys, file_name, file_size):
+    # iterate through each key and make sure 
+    db = get_item(db, list(keys))
+    if file_size != "dir":
+        db[file_name] = file_size
+
+# recursively collect dir sizes
+def get_dict_size(source_dict, sum_dict):
+    for key in source_dict.keys():
+        if isinstance(key, dict):
+            sum_dict[key] = get_dict_size(key, sum_dict)
+        else:
+            sum_dict[key] += source_dict[key]
+    return sum_dict
+
 
 files = {}
 current_cmd = None
@@ -48,6 +60,9 @@ for line in f:
             split = l.split(" ")
             file_size = split[0]
             file_name = split[1]
-            files = set_item(files, directories, file_name, file_size)
+            set_item(files, directories, file_name, file_size)
 
-pprint.pprint(files)
+
+dir_size = {}
+dir_size = get_dict_size(files, dir_size)
+pprint.pprint(dir_size)
