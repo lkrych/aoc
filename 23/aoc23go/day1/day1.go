@@ -8,7 +8,7 @@ import (
 	"strings"
 	"unicode"
 
-	input "github.com/lkrych/aoc23go/input" // relative import for input
+	input "github.com/lkrych/aoc23go/input"
 )
 
 func Part1() {
