@@ -6,21 +6,6 @@ import (
 	"os"
 )
 
-// getFileName asks stdin for a file name and returns answer as string
-func GetFileName() string {
-	scanner := bufio.NewScanner(os.Stdin)
-
-	fmt.Print("Enter test file: ")
-
-	// Read input from stdin line by line
-	var input string
-	for scanner.Scan() {
-		input = scanner.Text()
-	}
-
-	return input
-}
-
 // readInputFile takes in a filepath as a string and returns a bufio.Scanner
 func ReadInputFile(filePath string) (*bufio.Scanner, error) {
 	fmt.Println("Trying to read ", filePath)

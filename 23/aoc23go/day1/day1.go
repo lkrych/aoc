@@ -1,8 +1,11 @@
 package day1
 
 import (
+	"flag"
 	"fmt"
+	"sort"
 	"strconv"
+	"strings"
 	"unicode"
 
 	input "github.com/lkrych/aoc23go/input" // relative import for input
@@ -10,8 +13,10 @@ import (
 
 func Part1() {
 	// BOILERPLATE for getting file name from stdIn and reading line by line
-	filename := input.GetFileName()
-	filepath := fmt.Sprintf("../input/%s", filename)
+	filename := flag.String("f", "", "input file")
+	// Parse the command-line arguments to read the flag value
+	flag.Parse()
+	filepath := fmt.Sprintf("../input/%s", *filename)
 	scanner, err := input.ReadInputFile(filepath)
 	if err != nil {
 		panic(err)
@@ -59,7 +64,27 @@ func Part1() {
 func splitBasedOnNumbers(s string) []string {
 	// FIND SOME WAY OF MATCHING OVERLAPPING REGEX
 
-	fmt.Println("matches ", matches)
+	delimiters := []string{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
+
+	// Create a map to store the indices of the found words
+	wordIndices := make(map[string][]int)
+
+	// Iterate through matches and record the indices
+	for _, d := range delimiters {
+		idx := strings.Index(s, d)
+		if 
+	}
+
+	// Sort the words by their index in the string
+	var result []string
+	for word := range wordIndices {
+		result = append(result, word)
+	}
+	sort.Slice(result, func(i, j int) bool {
+		return wordIndices[result[i]] < wordIndices[result[j]]
+	})
+
+	fmt.Println("Results ", result)
 
 	wordToValue := map[string]string{
 		"one":   "1",
@@ -74,18 +99,20 @@ func splitBasedOnNumbers(s string) []string {
 	}
 
 	// Iterate over the list and replace words if found in the map
-	for i, m := range matches {
+	for i, m := range result {
 		if newValue, found := wordToValue[m]; found {
-			matches[i] = newValue
+			result[i] = newValue
 		}
 	}
-	return matches
+	return result
 }
 
 func Part2() {
 	// BOILERPLATE for getting file name from stdIn and reading line by line
-	filename := input.GetFileName()
-	filepath := fmt.Sprintf("../input/%s", filename)
+	filename := flag.String("f", "", "input file")
+	// Parse the command-line arguments to read the flag value
+	flag.Parse()
+	filepath := fmt.Sprintf("../input/%s", *filename)
 	scanner, err := input.ReadInputFile(filepath)
 	if err != nil {
 		panic(err)
