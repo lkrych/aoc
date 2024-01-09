@@ -61,6 +61,23 @@ func Part1() {
 	fmt.Println("Total Calibration Sum: ", calibrationSum)
 }
 
+// findAllSubstrIndices finds all occurrences of a substring within a string
+func findAllSubstrIndices(s, substr string) []int {
+	indices := []int{}
+	lastIndex := 0
+
+	for {
+		index := strings.Index(s[lastIndex:], substr)
+		if index == -1 {
+			break // Substring not found
+		}
+		indices = append(indices, lastIndex+index)
+		lastIndex += index + 1
+	}
+
+	return indices
+}
+
 func splitBasedOnNumbers(s string) []string {
 	// FIND SOME WAY OF MATCHING OVERLAPPING REGEX
 
@@ -71,20 +88,35 @@ func splitBasedOnNumbers(s string) []string {
 
 	// Iterate through matches and record the indices
 	for _, d := range delimiters {
-		idx := strings.Index(s, d)
-		if 
+		wordIndices[d] = findAllSubstrIndices(s, d)
 	}
 
-	// Sort the words by their index in the string
-	var result []string
-	for word := range wordIndices {
-		result = append(result, word)
+	// Create a list of entries, each containing a word and an index
+	var entryList []struct {
+		word  string
+		index int
 	}
-	sort.Slice(result, func(i, j int) bool {
-		return wordIndices[result[i]] < wordIndices[result[j]]
+
+	for word, indices := range wordIndices {
+		for _, index := range indices {
+			entryList = append(entryList, struct {
+				word  string
+				index int
+			}{word, index})
+		}
+	}
+
+	// Sort the list based on the indices
+	sort.Slice(entryList, func(i, j int) bool {
+		return entryList[i].index < entryList[j].index
 	})
 
-	fmt.Println("Results ", result)
+	// Create a final list of words ordered by indices
+	var orderedWords []string
+
+	for _, entry := range entryList {
+		orderedWords = append(orderedWords, entry.word)
+	}
 
 	wordToValue := map[string]string{
 		"one":   "1",
@@ -99,12 +131,12 @@ func splitBasedOnNumbers(s string) []string {
 	}
 
 	// Iterate over the list and replace words if found in the map
-	for i, m := range result {
+	for i, m := range orderedWords {
 		if newValue, found := wordToValue[m]; found {
-			result[i] = newValue
+			orderedWords[i] = newValue
 		}
 	}
-	return result
+	return orderedWords
 }
 
 func Part2() {
