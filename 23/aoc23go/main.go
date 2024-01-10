@@ -1,9 +1,9 @@
 package main
 
 import (
-	d "github.com/lkrych/aoc23go/day1" //relative path to day1
+	d "github.com/lkrych/aoc23go/day2"
 )
 
 func main() {
-	d.Part2()
+	d.Part1()
 }

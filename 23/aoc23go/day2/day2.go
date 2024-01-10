@@ -34,6 +34,7 @@ func Part1() {
 		// Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
 		// First
 		// Split the line by ':' to get the part before the colon, which contains the game number.
+		var maxRed, maxBlue, maxGreen int
 		parts := strings.Split(line, ":")
 		if len(parts) >= 1 {
 			// extract gameNumber
@@ -46,13 +47,39 @@ func Part1() {
 			// next split apart each individual round within the game
 			gameSection = parts[1]
 			setOfRounds := strings.Split(gameSection, ";")
-
-			// then keep track of the max possible values of each set of cubes per round of games
-
+			for _, r := range setOfRounds {
+				// next split apart the choices
+				setOfChoices := strings.Split(r, ",")
+				for _, c := range setOfChoices {
+					c = strings.TrimSpace(c)
+					numAndColor := strings.Split(c, " ")
+					num := numAndColor[0]
+					nInt, _ := strconv.Atoi(num)
+					color := numAndColor[1]
+					// keep track of the max possible values of each set of cubes per round of games
+					switch color {
+					case "blue":
+						if nInt > maxBlue {
+							maxBlue = nInt
+						}
+					case "green":
+						if nInt > maxGreen {
+							maxGreen = nInt
+						}
+					case "red":
+						if nInt > maxRed {
+							maxRed = nInt
+						}
+					}
+				}
+			}
+			// The Elf would first like to know which games would have been possible if the bag contained
+			// only 12 red cubes, 13 green cubes, and 14 blue cubes
+			if maxRed <= 12 && maxGreen <= 13 && maxBlue <= 14 {
+				// add this number to calibrationSum
+				possibleGamesSum += gameNumber
+			}
 		}
-
-		// add this number to calibrationSum
-		possibleGamesSum += gameNumber
 	}
 
 	if scanner.Err() != nil {
