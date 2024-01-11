@@ -87,3 +87,73 @@ func Part1() {
 	}
 	fmt.Println("Possible Games Sum: ", possibleGamesSum)
 }
+
+func Part2() {
+	// BOILERPLATE for getting file name from stdIn and reading line by line
+	filename := flag.String("f", "", "input file")
+	// Parse the command-line arguments to read the flag value
+	flag.Parse()
+	filepath := fmt.Sprintf("../input/%s", *filename)
+	scanner, err := input.ReadInputFile(filepath)
+	if err != nil {
+		panic(err)
+	}
+	defer scanner.Scan() // Close the file when done reading
+
+	// BEGIN CODING FOR DAY HERE
+	// INITIALIZE GLOBAL VALUES
+	possibleGamesSum := 0
+	for scanner.Scan() {
+		line := scanner.Text()
+		fmt.Println(line)
+		// INITIALIZE PER INPUT LINE VALUES
+		var gameSection string
+		// separate the input into different components
+		// Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
+		// First
+		// Split the line by ':' to get the part before the colon, which contains the game number.
+		var minRed, minBlue, minGreen int
+		parts := strings.Split(line, ":")
+		if len(parts) >= 1 {
+			// next split apart each individual round within the game
+			gameSection = parts[1]
+			setOfRounds := strings.Split(gameSection, ";")
+			for _, r := range setOfRounds {
+				// next split apart the choices
+				setOfChoices := strings.Split(r, ",")
+				for _, c := range setOfChoices {
+					c = strings.TrimSpace(c)
+					numAndColor := strings.Split(c, " ")
+					num := numAndColor[0]
+					nInt, _ := strconv.Atoi(num)
+					color := numAndColor[1]
+					// keep track of the max possible values of each set of cubes per round of games
+					switch color {
+					case "blue":
+						if nInt > minBlue {
+							minBlue = nInt
+						}
+					case "green":
+						if nInt > minGreen {
+							minGreen = nInt
+						}
+					case "red":
+						if nInt > minRed {
+							minRed = nInt
+						}
+					}
+				}
+			}
+			power := minBlue * minGreen * minRed
+			// fmt.Println("Minblue, minGreen, minRed ", minBlue, minGreen, minRed)
+			// fmt.Println("Power: ", power)
+
+			possibleGamesSum += power
+		}
+	}
+
+	if scanner.Err() != nil {
+		panic(scanner.Err())
+	}
+	fmt.Println("Possible Games Sum: ", possibleGamesSum)
+}
