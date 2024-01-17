@@ -20,6 +20,13 @@ func checkForSymbols(b byte) bool {
 	return false
 }
 
+func indexInRange(i int, len int) bool {
+	if i > 0 && i < len {
+		return true
+	}
+	return false
+}
+
 func Part1() {
 	// BOILERPLATE for getting file name from stdIn and reading line by line
 	filename := flag.String("f", "", "input file")
@@ -47,14 +54,16 @@ func Part1() {
 	}
 
 	// keep track of the matches we've already found, we don't want to double count
-	var foundEngineParts map[int]bool
+	foundEngineParts := map[int]int{}
 
 	for i, line := range lines {
+		fmt.Println(line)
 		// Find all engine parts and their indices in the string
 		matches := re.FindAllStringIndex(line, -1)
 
 		// Print found numbers and their indices
 		for _, match := range matches {
+			// fmt.Println("match ", match)
 			foundEnginePart := false
 			startIdx, endIdx := match[0], match[1]
 			// now we need to check positionally whether this int should be included in the foundEnginePartsMap
@@ -62,50 +71,69 @@ func Part1() {
 			// then we will test all the spaces above and then all the spaces below the word
 
 			// first start with the easy cases of left and right of the match
-			if checkForSymbols(line[startIdx-1]) {
-				foundEnginePart = true
+			if indexInRange(startIdx-1, len(line)) {
+				if checkForSymbols(line[startIdx-1]) {
+					foundEnginePart = true
+				}
 			}
 
-			if checkForSymbols(line[endIdx+1]) {
-				foundEnginePart = true
+			if indexInRange(endIdx, len(line)) {
+				if checkForSymbols(line[endIdx]) {
+					foundEnginePart = true
+				}
 			}
 
 			// next check the characters above the current line
-			prevLine := lines[i-1]
-			// verify this line exists
-			for i := startIdx - 1; i <= endIdx+1; i++ {
-				if checkForSymbols(prevLine[i]) {
-					foundEnginePart = true
+			if indexInRange(i-1, len(lines)) {
+				prevLine := lines[i-1]
+				// verify this line exists
+				for i := startIdx - 1; i <= endIdx; i++ {
+					if indexInRange(i, len(prevLine)) {
+						if checkForSymbols(prevLine[i]) {
+							foundEnginePart = true
+						}
+					}
 				}
 			}
 
 			// next check the character below the current line
-			nextLine := lines[i+1]
-			// verify this line exists
-			for i := startIdx - 1; i <= endIdx+1; i++ {
-				if checkForSymbols(nextLine[i]) {
-					foundEnginePart = true
+			if indexInRange(i+1, len(lines)) {
+				nextLine := lines[i+1]
+				// verify this line exists
+				for i := startIdx - 1; i <= endIdx; i++ {
+					if indexInRange(i, len(nextLine)) {
+						if checkForSymbols(nextLine[i]) {
+							foundEnginePart = true
+						}
+					}
 				}
 			}
 
 			// if the enginePart is next to a symbol, save it to the map!
+			numberStr := line[startIdx:endIdx]
+			enginePart, err := strconv.Atoi(numberStr)
 			if foundEnginePart {
-				numberStr := line[startIdx:endIdx]
-
-				enginePart, err := strconv.Atoi(numberStr)
+				// fmt.Println("adding: ", enginePart)
 				if err != nil {
 					fmt.Printf("Error converting '%s' to integer: %v\n", numberStr, err)
 					continue
 				}
-				foundEngineParts[enginePart] = true
+				value, exists := foundEngineParts[enginePart]
+				if exists {
+					foundEngineParts[enginePart] = value + 1
+				} else {
+					foundEngineParts[enginePart] = 1
+				}
+			} else {
+				fmt.Println("didn't match ", enginePart)
 			}
 
 		}
 	}
 
 	enginePartSum := 0
-	for enginePart, _ := range foundEngineParts {
-		enginePartSum += enginePart
+	for enginePart, count := range foundEngineParts {
+		enginePartSum += (enginePart * count)
 	}
 
 	// BEGIN CODING FOR DAY HERE
