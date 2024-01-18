@@ -1,9 +1,9 @@
 package main
 
 import (
-	d "github.com/lkrych/aoc23go/day3"
+	d "github.com/lkrych/aoc23go/day4"
 )
 
 func main() {
-	d.Part2()
+	d.Part1()
 }
