@@ -78,3 +78,70 @@ func Part1() {
 	}
 	fmt.Println("Total Points: ", totalPoints)
 }
+
+func Part2() {
+	// BOILERPLATE for getting file name from stdIn and reading line by line
+	filename := flag.String("f", "", "input file")
+	// Parse the command-line arguments to read the flag value
+	flag.Parse()
+	filepath := fmt.Sprintf("../input/%s", *filename)
+	scanner, err := input.ReadInputFile(filepath)
+	if err != nil {
+		panic(err)
+	}
+	defer scanner.Scan() // Close the file when done reading
+
+	var lines []string
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+
+	// BEGIN CODING FOR DAY HERE
+	// INITIALIZE GLOBAL VALUES
+
+	copiesCollection := map[int]int{}
+	for i := 0; i < len(lines); i++ {
+		// init copiesCollection map
+		copiesCollection[i] = 1
+	}
+
+	for i := 0; i < len(lines); i++ {
+		lineCount := copiesCollection[i]
+		line := lines[i]
+		fmt.Println(line)
+		// fmt.Printf("%v\n", copiesCollection)
+		// INITIALIZE PER INPUT LINE VALUES
+		splitOnColon := strings.Split(line, ":")
+		splitOnBar := strings.Split(splitOnColon[1], "|")
+		winningNums := strings.TrimSpace(splitOnBar[0])
+		winningNumsList := strings.Split(winningNums, " ")
+		winningMap := marshalListIntoMap(winningNumsList)
+		candidateNums := strings.TrimSpace(splitOnBar[1])
+		candidateNumsList := strings.Split(candidateNums, " ")
+		candidateMap := marshalListIntoMap(candidateNumsList)
+
+		// iterate over the number of copies
+		for j := 0; j < lineCount; j++ {
+			// keep track of the number of matches
+			matches := 0
+			for win := range winningMap {
+				if _, ok := candidateMap[win]; ok {
+					matches += 1
+				}
+			}
+			// fmt.Printf("found %d matches \n", matches)
+
+			// now add the copies back to the map
+			for k := 1; k < matches+1; k++ {
+				val := copiesCollection[i+k]
+				copiesCollection[i+k] = val + 1
+			}
+		}
+	}
+	totalPoints := 0
+	for _, lineCount := range copiesCollection {
+		totalPoints += lineCount
+	}
+
+	fmt.Println("Total Points: ", totalPoints)
+}
