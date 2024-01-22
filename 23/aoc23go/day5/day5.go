@@ -58,6 +58,7 @@ func Part1() {
 
 	// strategy, first fill maps, then trace through maps
 	var currentMapName string
+	hasBeenMapped := map[int]bool{}
 	for scanner.Scan() {
 		line := scanner.Text()
 		fmt.Println(line)
@@ -74,6 +75,20 @@ func Part1() {
 			fmt.Println(splits)
 			mapName := removeWhitespace(splits[0])
 			fmt.Println("Updating map: ", mapName)
+			// seed next map with previous map
+			for _, s := range seeds {
+				prevMap := stringToMap[currentMapName]
+				prevVal, ok := prevMap[s]
+				if !ok {
+					// if a previous value wasn't found default to seed value
+					prevVal = s
+					fmt.Println("Defaulting to seed value for map ", mapName)
+				}
+				currentMap := stringToMap[mapName]
+				currentMap[s] = prevVal
+				stringToMap[mapName] = currentMap
+				hasBeenMapped[s] = false
+			}
 			currentMapName = mapName
 		} else if len(removeWhitespace(line)) > 1 {
 			if currentMap, ok := stringToMap[currentMapName]; !ok {
@@ -85,50 +100,27 @@ func Part1() {
 				sourceRangeStart := convertStringToInt(splitRanges[1])
 				rangeLen := convertStringToInt(splitRanges[2])
 				fmt.Println("Parsing ", currentMapName, " dest: ", destRangeStart, ", src: ", sourceRangeStart, ", range: ", rangeLen)
-				// fill in the map with ranges
-				for i := 0; i < rangeLen; i++ {
-					currentMap[sourceRangeStart+i] = destRangeStart + i
+				// iterate through each seed value in currentMap
+				for seed, v := range currentMap {
+					hasAlreadyBeenMapped := hasBeenMapped[seed]
+					if v >= sourceRangeStart && v <= sourceRangeStart+rangeLen && !hasAlreadyBeenMapped {
+						// find the difference
+						diff := v - sourceRangeStart
+						newDest := destRangeStart + diff
+						fmt.Println("Assigning ", newDest, " to ", currentMapName, " for seed ", seed)
+						currentMap[seed] = newDest
+						hasBeenMapped[seed] = true
+					}
 				}
-				// update map
-				stringToMap[currentMapName] = currentMap
 			}
 		}
 	}
-	lowestLoc := 100000
-	// now that all the maps have been parsed, step through each map
-	for _, s := range seeds {
-		soil, ok := stringToMap["seed-to-soil"][s]
-		if !ok {
-			soil = s
+
+	lowestLoc := 1000000000000000000
+	for _, v := range stringToMap["humidity-to-location"] {
+		if v < lowestLoc {
+			lowestLoc = v
 		}
-		fert, ok := stringToMap["soil-to-fertilizer"][soil]
-		if !ok {
-			fert = soil
-		}
-		water, ok := stringToMap["fertilizer-to-water"][fert]
-		if !ok {
-			water = fert
-		}
-		light, ok := stringToMap["water-to-light"][water]
-		if !ok {
-			light = water
-		}
-		temp, ok := stringToMap["light-to-temperature"][light]
-		if !ok {
-			temp = light
-		}
-		hum, ok := stringToMap["temperature-to-humidity"][temp]
-		if !ok {
-			hum = temp
-		}
-		loc, ok := stringToMap["humidity-to-location"][hum]
-		if !ok {
-			loc = hum
-		}
-		if loc < lowestLoc {
-			lowestLoc = loc
-		}
-		fmt.Println("Found location: ", loc)
 	}
 
 	if scanner.Err() != nil {
