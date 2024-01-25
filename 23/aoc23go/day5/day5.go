@@ -176,13 +176,18 @@ func handleSeedRange(sr SeedRange, mapStart, mapLen, destRangeStart int) (SeedRa
 	return sr, seedRangesToSave, seedRangesToRead
 }
 
-// ProcessLine processes each line and updates the maps accordingly.
+// ProcessLine processes a line of text and updates the maps with seed ranges.
 func ProcessLine(line, currentMapName, prevMapName string, stringToMap map[string][]SeedRange) {
 	if len(removeWhitespace(line)) <= 1 {
 		return
 	}
 
 	destRangeStart, sourceRangeStart, rangeLen := parseLine(line)
+	processSeedRanges(stringToMap, prevMapName, currentMapName, sourceRangeStart, rangeLen, destRangeStart)
+}
+
+// processSeedRanges processes each seed range in the previous map.
+func processSeedRanges(stringToMap map[string][]SeedRange, prevMapName, currentMapName string, sourceRangeStart, rangeLen, destRangeStart int) {
 	for idx, seedRange := range stringToMap[prevMapName] {
 		if seedRange.hasBeenMapped {
 			continue
