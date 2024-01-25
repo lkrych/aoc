@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math"
 	"strconv"
 	"strings"
 
@@ -208,120 +209,122 @@ func processSeedRanges(stringToMap map[string][]SeedRange, prevMapName, currentM
 }
 
 func Part2() {
-	// BOILERPLATE for getting file name from stdIn and reading line by line
-	filename := flag.String("f", "", "input file")
-	// Parse the command-line arguments to read the flag value
-	flag.Parse()
+	filename := parseCommandLineArguments()
 	filepath := fmt.Sprintf("../input/%s", *filename)
 
 	scanner, err := input.ReadInputFile(filepath)
 	if err != nil {
-		panic(err)
+		log.Fatalf("Error reading input file: %v", err)
 	}
-	defer scanner.Scan() // Close the file when done reading
+	defer scanner.Scan()
 
-	// BEGIN CODING FOR DAY HERE
-	// INITIALIZE GLOBAL VALUES
-	initialMap := []SeedRange{}
-	seedToSoilMap := []SeedRange{}
-	soilToFertilizer := []SeedRange{}
-	fertilizerToWater := []SeedRange{}
-	waterToLight := []SeedRange{}
-	lightToTemp := []SeedRange{}
-	tempToHumidity := []SeedRange{}
-	humidityToLoc := []SeedRange{}
-
-	stringToMap := map[string][]SeedRange{
-		"initial-map":             initialMap,
-		"seed-to-soil":            seedToSoilMap,
-		"soil-to-fertilizer":      soilToFertilizer,
-		"fertilizer-to-water":     fertilizerToWater,
-		"water-to-light":          waterToLight,
-		"light-to-temperature":    lightToTemp,
-		"temperature-to-humidity": tempToHumidity,
-		"humidity-to-location":    humidityToLoc,
-	}
-	// save new ranges to currentMap
-	currentMapName := "initial-map"
-	// read from old map
-	prevMapName := "initial-map"
+	stringToMap := initializeStringToMap()
+	currentMapName, prevMapName := "initial-map", "initial-map"
 
 	for scanner.Scan() {
 		line := scanner.Text()
 		fmt.Println(line)
-		// load the current working map
-		if strings.Contains(line, "seeds") {
-			seedSplit := strings.Split(line, " ")
-			seedsStr := seedSplit[1:]
-			// 79 14 and  55 13 seeds are now considered a range
-			for i := 0; i < len(seedsStr); i += 2 {
-				seedSrc := convertStringToInt(seedsStr[i])
-				seedRange := convertStringToInt(seedsStr[i+1])
-				initialMap = append(initialMap, SeedRange{seedSrc, seedRange, false})
-			}
-			// fmt.Printf("Initial map: %v\n", initialMap)
-			stringToMap["initial-map"] = initialMap
-		} else if strings.Contains(line, "map") {
-			// if we come across the line map, its time to load the new map
-			splits := strings.Split(line, " ")
-			mapName := removeWhitespace(splits[0])
-			readFromMap := stringToMap[prevMapName]
-			saveToMap := stringToMap[currentMapName]
-			// fmt.Printf("About to swap prev: %s - %v for new map: %s - %v\n", prevMapName, readFromMap, currentMapName, saveToMap)
-			// pass along ranges that didn't match
-			// fmt.Printf("prev: %s, current: %s,  newmap: %s \n", prevMapName, currentMapName, mapName)
-			if currentMapName != "initial-map" {
-				for _, sr := range readFromMap {
-					fmt.Println(sr)
-					if !sr.hasBeenMapped {
-						fmt.Printf("Adding %v to new map\n", sr)
-						saveToMap = append(saveToMap, sr)
-					}
-				}
-			}
-
-			fmt.Printf("After filling in ranges that didnt match: %s - %v for new map: %s - %v\n", prevMapName, readFromMap, mapName, saveToMap)
-
-			// save map
-			stringToMap[currentMapName] = saveToMap
-			// now swap the maps
-			prevMapName = currentMapName
-			currentMapName = mapName
-		} else if len(removeWhitespace(line)) > 1 {
-			ProcessLine(line, currentMapName, prevMapName, stringToMap)
-		}
+		processLine(line, &currentMapName, &prevMapName, stringToMap)
 	}
 
-	// some seeds might need to be added after final iteration
+	if err := scanner.Err(); err != nil {
+		log.Fatalf("Error during scanning: %v", err)
+	}
+
+	addLeftoverSeedRanges(stringToMap, currentMapName, prevMapName)
+	lowestLoc := findLowestLocation(stringToMap["humidity-to-location"])
+	fmt.Println("Lowest Location", lowestLoc)
+}
+
+func parseCommandLineArguments() *string {
+	filename := flag.String("f", "", "input file")
+	flag.Parse()
+	return filename
+}
+
+func initializeStringToMap() map[string][]SeedRange {
+	return map[string][]SeedRange{
+		"initial-map":             {},
+		"seed-to-soil":            {},
+		"soil-to-fertilizer":      {},
+		"fertilizer-to-water":     {},
+		"water-to-light":          {},
+		"light-to-temperature":    {},
+		"temperature-to-humidity": {},
+		"humidity-to-location":    {},
+	}
+}
+
+func processLine(line string, currentMapName, prevMapName *string, stringToMap map[string][]SeedRange) {
+	if strings.Contains(line, "seeds") {
+		processSeedsLine(line, stringToMap)
+	} else if strings.Contains(line, "map") {
+		// fmt.Println("Swapped maps before: prev: ", *prevMapName, " current: ", *currentMapName)
+		swapMaps(line, currentMapName, prevMapName, stringToMap)
+		// fmt.Println("Swapped maps after: prev: ", *prevMapName, " current: ", *currentMapName)
+	} else if len(removeWhitespace(line)) > 1 {
+		ProcessLine(line, *currentMapName, *prevMapName, stringToMap)
+	}
+}
+
+func processSeedsLine(line string, stringToMap map[string][]SeedRange) {
+	// Implementation of processing a seeds line
+	seedSplit := strings.Split(line, " ")
+	seedsStr := seedSplit[1:]
+	initialMap := stringToMap["initial-map"]
+	// 79 14 and  55 13 seeds are now considered a range
+	for i := 0; i < len(seedsStr); i += 2 {
+		seedSrc := convertStringToInt(seedsStr[i])
+		seedRange := convertStringToInt(seedsStr[i+1])
+		initialMap = append(initialMap, SeedRange{seedSrc, seedRange, false})
+	}
+	// fmt.Printf("Initial map: %v\n", initialMap)
+	stringToMap["initial-map"] = initialMap
+}
+
+func swapMaps(line string, currentMapName, prevMapName *string, stringToMap map[string][]SeedRange) {
+	// Implementation of swapping maps
+	splits := strings.Split(line, " ")
+	mapName := removeWhitespace(splits[0])
+
+	addLeftoverSeedRanges(stringToMap, *currentMapName, *prevMapName)
+
+	// now swap the maps
+	*prevMapName = *currentMapName
+	*currentMapName = mapName
+}
+
+func addLeftoverSeedRanges(stringToMap map[string][]SeedRange, currentMapName, prevMapName string) {
+	// Final processing of maps after the main loop
 	readFromMap := stringToMap[prevMapName]
 	saveToMap := stringToMap[currentMapName]
 
+	// fmt.Printf("About to swap prev: %s - %v for new map: %s - %v\n", prevMapName, readFromMap, currentMapName, saveToMap)
+	// pass along ranges that didn't match
+	// fmt.Printf("prev: %s, current: %s,  newmap: %s \n", prevMapName, currentMapName, mapName)
 	if currentMapName != "initial-map" {
 		for _, sr := range readFromMap {
-			fmt.Println(sr)
+			// fmt.Println(sr)
 			if !sr.hasBeenMapped {
 				fmt.Printf("Adding %v to new map\n", sr)
 				saveToMap = append(saveToMap, sr)
 			}
 		}
 	}
-	stringToMap[currentMapName] = saveToMap
 
-	lowestLoc := 1000000000000000000
-	fmt.Println("len humidity map: ", len(stringToMap["humidity-to-location"]))
-	for _, v := range stringToMap["humidity-to-location"] {
-		fmt.Println(v)
-		// add weird hack to find smallest seed
-		if v.start == 0 {
-			continue
-		}
-		if v.start < lowestLoc {
+	// save map
+	stringToMap[currentMapName] = saveToMap
+	// fmt.Printf("After filling in ranges that didnt match: %s - %v for new map: %s - %v\n", prevMapName, readFromMap, mapName, saveToMap)
+
+}
+
+func findLowestLocation(humidityToLocation []SeedRange) int {
+	lowestLoc := math.MaxInt
+	for _, v := range humidityToLocation {
+		fmt.Println(v.start)
+		if v.start != 0 && v.start < lowestLoc {
 			lowestLoc = v.start
 		}
 	}
-
-	if scanner.Err() != nil {
-		panic(scanner.Err())
-	}
-	fmt.Println("Lowest Location", lowestLoc)
+	return lowestLoc
 }
