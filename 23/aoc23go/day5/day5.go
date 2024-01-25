@@ -135,13 +135,6 @@ type SeedRange struct {
 	hasBeenMapped bool
 }
 
-// UpdateMapNames updates the current and previous map names.
-func UpdateMapNames(currentMapName, prevMapName, mapName string) (string, string) {
-	prevMapName = currentMapName
-	currentMapName = mapName
-	return currentMapName, prevMapName
-}
-
 // parseLine parses a line into three integers.
 func parseLine(line string) (int, int, int) {
 	parts := strings.Split(line, " ")
@@ -179,7 +172,6 @@ func handleSeedRange(sr SeedRange, mapStart, mapLen, destRangeStart int) (SeedRa
 		// case 2 sr starts before map range
 		// this means we need to save the unmapped values up to the mapStart
 		nonOverlapLen := mapStart - sr.start
-		seedRangesToSave = append(seedRangesToSave, SeedRange{start: sr.start, len: nonOverlapLen, hasBeenMapped: false})
 		fmt.Printf("Case 2: unmapped values: %v\n ", SeedRange{start: sr.start, len: nonOverlapLen, hasBeenMapped: false})
 		// push unmapped values back into iterator list
 		seedRangesToRead = append(seedRangesToRead, SeedRange{start: sr.start, len: nonOverlapLen, hasBeenMapped: false})
@@ -194,7 +186,6 @@ func handleSeedRange(sr SeedRange, mapStart, mapLen, destRangeStart int) (SeedRa
 		// this means we need to save the unmapped values after the sourceRange finish
 		nonOverlapStart := mapStart + mapLen
 		nonOverlapLen := srFinish - nonOverlapStart + 1
-		seedRangesToSave = append(seedRangesToSave, SeedRange{start: nonOverlapStart, len: nonOverlapLen, hasBeenMapped: false})
 		fmt.Printf("Case 3: unmapped values: %v\n ", SeedRange{start: nonOverlapStart, len: nonOverlapLen})
 		// push unmapped values back into iterator list
 		seedRangesToRead = append(seedRangesToRead, SeedRange{start: nonOverlapStart, len: nonOverlapLen, hasBeenMapped: false})
@@ -206,6 +197,8 @@ func handleSeedRange(sr SeedRange, mapStart, mapLen, destRangeStart int) (SeedRa
 		seedRangesToSave = append(seedRangesToSave, SeedRange{start: newDest, len: newLen})
 		fmt.Printf("Case 3: overlapped values: %v\n ", SeedRange{start: newDest, len: newLen, hasBeenMapped: false})
 		sr.hasBeenMapped = true
+	} else {
+		fmt.Println("NO OVERLAPS")
 	}
 
 	return sr, seedRangesToSave, seedRangesToRead
@@ -220,6 +213,7 @@ func ProcessLine(line string, currentMapName, prevMapName string, stringToMap ma
 	readFromMap, saveToMap := stringToMap[prevMapName], stringToMap[currentMapName]
 	destRangeStart, sourceRangeStart, rangeLen := parseLine(line)
 
+	// fmt.Printf("%v\n", readFromMap)
 	addToReadFromMap := []SeedRange{}
 	for idx, seedRange := range readFromMap {
 		if seedRange.hasBeenMapped {
@@ -295,29 +289,62 @@ func Part2() {
 				seedRange := convertStringToInt(seedsStr[i+1])
 				initialMap = append(initialMap, SeedRange{seedSrc, seedRange, false})
 			}
+			// fmt.Printf("Initial map: %v\n", initialMap)
 			stringToMap["initial-map"] = initialMap
 		} else if strings.Contains(line, "map") {
+			// if we come across the line map, its time to load the new map
 			splits := strings.Split(line, " ")
 			mapName := removeWhitespace(splits[0])
 			readFromMap := stringToMap[prevMapName]
 			saveToMap := stringToMap[currentMapName]
+			// fmt.Printf("About to swap prev: %s - %v for new map: %s - %v\n", prevMapName, readFromMap, currentMapName, saveToMap)
 			// pass along ranges that didn't match
-			for _, sr := range readFromMap {
-				if !sr.hasBeenMapped {
-					saveToMap = append(saveToMap, sr)
+			// fmt.Printf("prev: %s, current: %s,  newmap: %s \n", prevMapName, currentMapName, mapName)
+			if currentMapName != "initial-map" {
+				for _, sr := range readFromMap {
+					fmt.Println(sr)
+					if !sr.hasBeenMapped {
+						fmt.Printf("Adding %v to new map\n", sr)
+						saveToMap = append(saveToMap, sr)
+					}
 				}
 			}
+
+			fmt.Printf("After filling in ranges that didnt match: %s - %v for new map: %s - %v\n", prevMapName, readFromMap, mapName, saveToMap)
+
 			// save map
 			stringToMap[currentMapName] = saveToMap
-			currentMapName, prevMapName = UpdateMapNames(currentMapName, prevMapName, mapName)
+			// now swap the maps
+			prevMapName = currentMapName
+			currentMapName = mapName
 		} else if len(removeWhitespace(line)) > 1 {
 			ProcessLine(line, currentMapName, prevMapName, stringToMap)
 		}
 	}
 
+	// some seeds might need to be added after final iteration
+	readFromMap := stringToMap[prevMapName]
+	saveToMap := stringToMap[currentMapName]
+
+	if currentMapName != "initial-map" {
+		for _, sr := range readFromMap {
+			fmt.Println(sr)
+			if !sr.hasBeenMapped {
+				fmt.Printf("Adding %v to new map\n", sr)
+				saveToMap = append(saveToMap, sr)
+			}
+		}
+	}
+	stringToMap[currentMapName] = saveToMap
+
 	lowestLoc := 1000000000000000000
+	fmt.Println("len humidity map: ", len(stringToMap["humidity-to-location"]))
 	for _, v := range stringToMap["humidity-to-location"] {
 		fmt.Println(v)
+		// add weird hack to find smallest seed
+		if v.start == 0 {
+			continue
+		}
 		if v.start < lowestLoc {
 			lowestLoc = v.start
 		}
