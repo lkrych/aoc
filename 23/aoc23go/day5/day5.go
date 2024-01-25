@@ -135,87 +135,55 @@ type SeedRange struct {
 	hasBeenMapped bool
 }
 
-// parseLine parses a line into three integers.
 func parseLine(line string) (int, int, int) {
-	parts := strings.Split(line, " ")
-	destRangeStart := convertStringToInt(parts[0])
-	sourceRangeStart := convertStringToInt(parts[1])
-	rangeLen := convertStringToInt(parts[2])
-	return destRangeStart, sourceRangeStart, rangeLen
+	parts := strings.Fields(line)
+	return convertStringToInt(parts[0]), convertStringToInt(parts[1]), convertStringToInt(parts[2])
 }
 
-// printSeedRangeInfo prints information about a SeedRange.
 func printSeedRangeInfo(sr SeedRange, prevMapName string, sourceRangeStart, rangeLen int) {
 	fmt.Printf("Reading %v from %s and comparing to start: %d, len: %d\n", sr, prevMapName, sourceRangeStart, rangeLen)
 }
 
-// handleSeedRange processes a SeedRange and returns an updated range and new ranges.
+func addRange(ranges []SeedRange, start, len int) []SeedRange {
+	return append(ranges, SeedRange{start: start, len: len, hasBeenMapped: false})
+}
+
 func handleSeedRange(sr SeedRange, mapStart, mapLen, destRangeStart int) (SeedRange, []SeedRange, []SeedRange) {
-	var seedRangesToSave []SeedRange
-	var seedRangesToRead []SeedRange
+	var seedRangesToSave, seedRangesToRead []SeedRange
+	srFinish, mapFinish := sr.start+sr.len-1, mapStart+mapLen-1
 
-	// Implement the logic for handling the SeedRange here.
-	// This involves checking the conditions as in the original code and updating
-	// the SeedRange and creating new SeedRanges as necessary.
-
-	//srFinish needs to subtract 1 because count includes sr.start
-	srFinish := (sr.start + sr.len) - 1
-	mapFinish := (mapStart + mapLen) - 1
-	if sr.start >= mapStart && sr.start <= mapFinish && srFinish <= mapFinish {
-		// fmt.Println("Assigning ", newDest, " to ", currentMapName, " for seed ", seed)
+	switch {
+	case sr.start >= mapStart && srFinish <= mapFinish:
 		diff := sr.start - mapStart
-		newDest := destRangeStart + diff
-		seedRangesToSave = append(seedRangesToSave, SeedRange{start: newDest, len: sr.len, hasBeenMapped: false})
-		fmt.Printf("Case 1: overlaps entire range: %v\n ", SeedRange{start: newDest, len: sr.len})
+		seedRangesToSave = addRange(seedRangesToSave, destRangeStart+diff, sr.len)
 		sr.hasBeenMapped = true
-	} else if sr.start <= mapStart && srFinish >= mapStart && srFinish <= mapFinish {
-		// case 2 sr starts before map range
-		// this means we need to save the unmapped values up to the mapStart
+	case sr.start <= mapStart && srFinish >= mapStart && srFinish <= mapFinish:
 		nonOverlapLen := mapStart - sr.start
-		fmt.Printf("Case 2: unmapped values: %v\n ", SeedRange{start: sr.start, len: nonOverlapLen, hasBeenMapped: false})
-		// push unmapped values back into iterator list
-		seedRangesToRead = append(seedRangesToRead, SeedRange{start: sr.start, len: nonOverlapLen, hasBeenMapped: false})
-
-		// we also need to save the overlap from mapStart
-		overLapLen := (srFinish) - mapStart + 1
-		seedRangesToSave = append(seedRangesToSave, SeedRange{start: destRangeStart, len: overLapLen, hasBeenMapped: false})
-		fmt.Printf("Case 2: overlapped values: %v\n ", SeedRange{start: destRangeStart, len: overLapLen})
+		overLapLen := srFinish - mapStart + 1
+		seedRangesToRead = addRange(seedRangesToRead, sr.start, nonOverlapLen)
+		seedRangesToSave = addRange(seedRangesToSave, destRangeStart, overLapLen)
 		sr.hasBeenMapped = true
-	} else if sr.start >= mapStart && sr.start <= mapFinish && srFinish >= mapFinish {
-		// case 3 sr starts after map range and overlaps over the range
-		// this means we need to save the unmapped values after the sourceRange finish
-		nonOverlapStart := mapStart + mapLen
+	case sr.start >= mapStart && sr.start <= mapFinish && srFinish >= mapFinish:
+		nonOverlapStart := mapFinish + 1
 		nonOverlapLen := srFinish - nonOverlapStart + 1
-		fmt.Printf("Case 3: unmapped values: %v\n ", SeedRange{start: nonOverlapStart, len: nonOverlapLen})
-		// push unmapped values back into iterator list
-		seedRangesToRead = append(seedRangesToRead, SeedRange{start: nonOverlapStart, len: nonOverlapLen, hasBeenMapped: false})
-
-		// we also need to save the overlap from mapStart
+		seedRangesToRead = addRange(seedRangesToRead, nonOverlapStart, nonOverlapLen)
 		diff := sr.start - mapStart
-		newDest := destRangeStart + diff
-		newLen := (mapStart + mapLen) - sr.start
-		seedRangesToSave = append(seedRangesToSave, SeedRange{start: newDest, len: newLen})
-		fmt.Printf("Case 3: overlapped values: %v\n ", SeedRange{start: newDest, len: newLen, hasBeenMapped: false})
+		newLen := mapFinish - sr.start + 1
+		seedRangesToSave = addRange(seedRangesToSave, destRangeStart+diff, newLen)
 		sr.hasBeenMapped = true
-	} else {
-		fmt.Println("NO OVERLAPS")
 	}
 
 	return sr, seedRangesToSave, seedRangesToRead
 }
 
 // ProcessLine processes each line and updates the maps accordingly.
-func ProcessLine(line string, currentMapName, prevMapName string, stringToMap map[string][]SeedRange) {
+func ProcessLine(line, currentMapName, prevMapName string, stringToMap map[string][]SeedRange) {
 	if len(removeWhitespace(line)) <= 1 {
 		return
 	}
 
-	readFromMap, saveToMap := stringToMap[prevMapName], stringToMap[currentMapName]
 	destRangeStart, sourceRangeStart, rangeLen := parseLine(line)
-
-	// fmt.Printf("%v\n", readFromMap)
-	addToReadFromMap := []SeedRange{}
-	for idx, seedRange := range readFromMap {
+	for idx, seedRange := range stringToMap[prevMapName] {
 		if seedRange.hasBeenMapped {
 			continue
 		}
@@ -224,17 +192,14 @@ func ProcessLine(line string, currentMapName, prevMapName string, stringToMap ma
 		updatedSeedRange, toSaveRanges, toAppendRanges := handleSeedRange(seedRange, sourceRangeStart, rangeLen, destRangeStart)
 
 		if updatedSeedRange.hasBeenMapped {
-			readFromMap[idx] = updatedSeedRange
-			saveToMap = append(saveToMap, toSaveRanges...)
+			stringToMap[prevMapName][idx] = updatedSeedRange
+			stringToMap[currentMapName] = append(stringToMap[currentMapName], toSaveRanges...)
 		}
 
 		if len(toAppendRanges) > 0 {
-			addToReadFromMap = append(addToReadFromMap, toAppendRanges...)
+			stringToMap[prevMapName] = append(stringToMap[prevMapName], toAppendRanges...)
 		}
 	}
-
-	readFromMap = append(readFromMap, addToReadFromMap...)
-	stringToMap[currentMapName], stringToMap[prevMapName] = saveToMap, readFromMap
 }
 
 func Part2() {
