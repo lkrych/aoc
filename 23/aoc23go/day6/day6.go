@@ -23,7 +23,7 @@ func findWinningRanges(timeToRace int, maxDistance int) int {
 	for i := 0; i < timeToRace; i++ {
 		distance := findDistance(i, timeToRace)
 		if distance > maxDistance {
-			fmt.Println(distance, " is a winning range for pressing the button ", i, " for a total race time of ", timeToRace, "and a max dist of ", maxDistance)
+			// fmt.Println(distance, " is a winning range for pressing the button ", i, " for a total race time of ", timeToRace, "and a max dist of ", maxDistance)
 			winningRanges += 1
 		}
 	}
