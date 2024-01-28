@@ -30,6 +30,60 @@ func findWinningRanges(timeToRace int, maxDistance int) int {
 	return winningRanges
 }
 
+// attempt to speed up runtime by doing a binary search to narrow down the range
+func findWinningRangesBinarySearch(timeToRace int, maxDistance int) int {
+	binSearchUpperBound := 0
+	binSearchLowerBound := 0
+
+	//attempt to narrow down range of possible winning ranges
+	// fmt.Println("Finding Ranges")
+	t := 1
+	for {
+		d := findDistance(t, timeToRace)
+		if d > maxDistance {
+			if binSearchLowerBound == 0 && binSearchUpperBound == 0 {
+				// fmt.Println("Setting lower bound ", t)
+				binSearchLowerBound = t
+			} else if binSearchUpperBound == 0 {
+				// fmt.Println("Setting upper bound ", t)
+				binSearchUpperBound = t
+			}
+		}
+		t *= 2
+		if binSearchLowerBound != 0 && binSearchUpperBound != 0 {
+			break
+		}
+	}
+
+	// fmt.Println("Found bounds")
+
+	// iterate down from lower bound to find exact range
+	possibleLowerBound := binSearchLowerBound - 1
+	for {
+		d := findDistance(possibleLowerBound, timeToRace)
+		if d < maxDistance {
+			break
+		}
+		possibleLowerBound -= 1
+	}
+
+	// fmt.Println("Found lowerBound")
+
+	// iterate up from upper bound to find exact range
+	possibleUpperBound := binSearchUpperBound + 1
+	for {
+		d := findDistance(possibleUpperBound, timeToRace)
+		if d < maxDistance {
+			break
+		}
+		possibleUpperBound += 1
+	}
+
+	// fmt.Println("Found upperBound")
+
+	return possibleUpperBound - possibleLowerBound - 1
+}
+
 func findDistance(timeToPressButton int, timeToRace int) int {
 	totalSpeed := 1 * timeToPressButton
 	totalTimeToRace := timeToRace - timeToPressButton
@@ -127,7 +181,7 @@ func Part2() {
 
 	numOfPossibleWins := 0
 	// iterate through races and determine the ran
-	numOfPossibleWins = findWinningRanges(totalTime, totalDistance)
+	numOfPossibleWins = findWinningRangesBinarySearch(totalTime, totalDistance)
 
 	if scanner.Err() != nil {
 		panic(scanner.Err())
