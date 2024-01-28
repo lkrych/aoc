@@ -86,3 +86,52 @@ func Part1() {
 
 	fmt.Println("Winning range multiple ", maxRanges)
 }
+
+func Part2() {
+	// BOILERPLATE for getting file name from stdIn and reading line by line
+	filename := flag.String("f", "", "input file")
+	// Parse the command-line arguments to read the flag value
+	flag.Parse()
+	filepath := fmt.Sprintf("../input/%s", *filename)
+	scanner, err := input.ReadInputFile(filepath)
+	if err != nil {
+		panic(err)
+	}
+	defer scanner.Scan() // Close the file when done reading
+
+	// BEGIN CODING FOR DAY HERE
+	// INITIALIZE GLOBAL VALUES
+
+	// read from input
+	times := []string{}
+	distances := []string{}
+	for scanner.Scan() {
+		line := scanner.Text()
+		split := strings.Split(line, " ")
+		for _, el := range split[1:] {
+			if el == "" {
+				continue
+			}
+			if strings.Contains(line, "Time:") {
+				times = append(times, el)
+			} else if strings.Contains(line, "Distance:") {
+				distances = append(distances, el)
+			}
+		}
+	}
+
+	totalTime := convertStringToInt(strings.Join(times, ""))
+	totalDistance := convertStringToInt(strings.Join(distances, ""))
+
+	fmt.Println("TotalTime: ", totalTime, " TotalDistance: ", totalDistance)
+
+	numOfPossibleWins := 0
+	// iterate through races and determine the ran
+	numOfPossibleWins = findWinningRanges(totalTime, totalDistance)
+
+	if scanner.Err() != nil {
+		panic(scanner.Err())
+	}
+
+	fmt.Println("NumberOfPossibleWins ", numOfPossibleWins)
+}
