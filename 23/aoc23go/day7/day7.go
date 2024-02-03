@@ -110,7 +110,7 @@ func (c *CamelCard) findHandType() {
 			m[cr] = count + 1
 		}
 	}
-	// fmt.Println(c.cardRanks, m)
+	fmt.Println(c.cardRanks, m)
 	three := false
 	pair := 0
 	for _, v := range m {
@@ -178,8 +178,8 @@ func Part1() {
 		// example input: 32T3K 765
 		line := scanner.Text()
 		c := createCard(line)
-		// fmt.Println(c.cards, c.handType)
-		// fmt.Println()
+		fmt.Println(c.cards, c.handType)
+		fmt.Println()
 		cards = append(cards, c)
 	}
 
@@ -187,7 +187,149 @@ func Part1() {
 
 	// find the multiplier
 	for i, c := range cards {
+		// fmt.Println(c.cards, c.handType)
+		totalWinnings += (i + 1) * c.bid
+	}
+
+	if scanner.Err() != nil {
+		panic(scanner.Err())
+	}
+
+	fmt.Println("TotalWinnings", totalWinnings)
+}
+
+func (c *CamelCard) findCardRanks2() {
+	CardRankMap := map[string]int{
+		"T": 10,
+		"J": 1,
+		"Q": 11,
+		"K": 12,
+		"A": 13,
+	}
+	cardRanks := []CardRank{}
+	splitRank := strings.Split(c.cards, "")
+	for _, rank := range splitRank {
+		if isInt(rank) {
+			cardRanks = append(cardRanks, CardRank(convertStringToInt(rank)))
+		} else {
+			crIntVal := CardRankMap[rank]
+			cardRanks = append(cardRanks, CardRank(crIntVal))
+		}
+	}
+	c.cardRanks = cardRanks
+}
+
+func addJokers(m map[CardRank]int, jokerCount int) {
+	// remove jokers from map
+	delete(m, 1)
+
+	highCount := 0
+	var highKey CardRank
+	for k, v := range m {
+		if v > highCount {
+			highCount = v
+			highKey = k
+		}
+	}
+	m[highKey] = highCount + jokerCount
+
+}
+
+func (c *CamelCard) findHandType2() {
+	// put cards into map
+	m := map[CardRank]int{}
+	for _, cr := range c.cardRanks {
+		count, found := m[cr]
+		if !found {
+			m[cr] = 1
+		} else {
+			m[cr] = count + 1
+		}
+	}
+	fmt.Println("Before Jokers", m)
+	// add joker logic
+	jokerCount := m[1]
+	addJokers(m, jokerCount)
+	fmt.Println("After Jokers", m)
+
+	// fmt.Println(c.cardRanks, m)
+	three := false
+	pair := 0
+	for _, v := range m {
+		switch v {
+		case 5:
+			c.handType = FiveOfAKind
+		case 4:
+			c.handType = FourOfAKind
+		case 3:
+			three = true
+		case 2:
+			pair += 1
+		}
+	}
+	if three && pair == 1 {
+		c.handType = FullHouse
+	} else if three {
+		c.handType = ThreeOfAKind
+	} else if pair == 2 {
+		c.handType = TwoPair
+	} else if pair == 1 {
+		c.handType = OnePair
+	} else if c.handType == 0 {
+		c.handType = HighCard
+	}
+}
+
+func (c *CamelCard) FindHandTypeAndHighCard2() {
+	c.findCardRanks2()
+	// next we need to find the Hand Type
+	c.findHandType2()
+}
+
+func createCard2(line string) CamelCard {
+	split := strings.Split(line, " ")
+
+	c := CamelCard{
+		cards: split[0],
+		bid:   convertStringToInt(split[1]),
+	}
+	// find the handType and high card
+	c.FindHandTypeAndHighCard2()
+	return c
+}
+
+func Part2() {
+	// BOILERPLATE for getting file name from stdIn and reading line by line
+	filename := flag.String("f", "", "input file")
+	// Parse the command-line arguments to read the flag value
+	flag.Parse()
+	filepath := fmt.Sprintf("../input/%s", *filename)
+	scanner, err := input.ReadInputFile(filepath)
+	if err != nil {
+		panic(err)
+	}
+	defer scanner.Scan() // Close the file when done reading
+
+	// BEGIN CODING FOR DAY HERE
+	// INITIALIZE GLOBAL VALUES
+	totalWinnings := 0
+
+	cards := []CamelCard{}
+	// first parse through all the hands
+	for scanner.Scan() {
+		// example input: 32T3K 765
+		line := scanner.Text()
+		c := createCard2(line)
 		fmt.Println(c.cards, c.handType)
+		fmt.Println()
+		cards = append(cards, c)
+	}
+
+	sort.Sort(ByCamelCard(cards))
+
+	// find the multiplier
+	for i, c := range cards {
+		// fmt.Println(c.cards, c.handType)
 		totalWinnings += (i + 1) * c.bid
 	}
 
