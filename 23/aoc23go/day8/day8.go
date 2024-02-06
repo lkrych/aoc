@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"strings"
-	"sync"
 
 	"github.com/lkrych/aoc23go/input"
 )
@@ -94,30 +93,6 @@ func Part1() {
 	fmt.Println("Steps taken: ", stepsTaken)
 }
 
-func walkUntilYouReachEnd(m map[string]Node, start string, pathEls []string, results chan<- int) {
-	fmt.Println("Starting on ", start)
-	currentStep := start
-	stepsTaken := 0
-	// Now walk the path until you reach the current step
-	for currentStep[2] != 'Z' {
-		for _, el := range pathEls {
-			if currentStep[2] == 'Z' {
-				break
-			}
-			stepsTaken += 1
-			currentStepNode := m[currentStep]
-			if el == "R" {
-				currentStep = currentStepNode.right
-			} else if el == "L" {
-				currentStep = currentStepNode.left
-			} else {
-				panic("The path was neither right nor left!")
-			}
-		}
-	}
-	results <- stepsTaken
-}
-
 func Part2() {
 	// BOILERPLATE for getting file name from stdIn and reading line by line
 	filename := flag.String("f", "", "input file")
@@ -161,32 +136,37 @@ func Part2() {
 			path += line
 		}
 	}
-
-	numWorkers := len(startingNodes)
-	results := make(chan int, numWorkers)
-	var wg sync.WaitGroup
-	wg.Add(numWorkers)
+	fmt.Println("Starting nodes: ", startingNodes)
 	pathEls := strings.Split(path, "")
-
-	for i := 0; i < numWorkers; i++ {
-		startingNode := startingNodes[i]
-		go func(m map[string]Node, s string, p []string) {
-			defer wg.Done()
-			walkUntilYouReachEnd(m, s, p, results)
-		}(graph, startingNode, pathEls)
-	}
-
-	// close channel when done
-	go func() {
-		wg.Wait()
-		close(results)
-	}()
-
 	stepsTaken := 0
-	// read from results while channel is open
-	for result := range results {
-		fmt.Println(result)
-		stepsTaken += result
+
+ForeverLoop: //label for forever loop
+	for {
+		for _, el := range pathEls {
+			for i, node := range startingNodes {
+				currentStep := node
+				currentStepNode := graph[currentStep]
+				if el == "R" {
+					startingNodes[i] = currentStepNode.right
+				} else if el == "L" {
+					startingNodes[i] = currentStepNode.left
+				} else {
+					panic("The path was neither right nor left!")
+				}
+			}
+			// fmt.Println("step: ", startingNodes)
+			stepsTaken += 1
+			// check if we can escape
+			allTrue := true
+			for _, node := range startingNodes {
+				if node[2] != 'Z' {
+					allTrue = false
+				}
+			}
+			if allTrue {
+				break ForeverLoop
+			}
+		}
 	}
 
 	if scanner.Err() != nil {
