@@ -167,16 +167,12 @@ func Part2() {
 	pathEls := strings.Split(path, "")
 	loopCounts := make([]int, len(startingNodes))
 	foundLoops := make([]bool, len(startingNodes))
+	foundEnds := make([]bool, len(startingNodes))
 
 OuterLoop:
 	for {
 		for _, el := range pathEls {
 			for i, node := range startingNodes {
-				foundLoop := foundLoops[i]
-				// if we've found the loop already, no need to increment the counter
-				if foundLoop {
-					continue
-				}
 				currentStep := node
 				currentStepNode := graph[currentStep]
 				if el == "R" {
@@ -187,13 +183,21 @@ OuterLoop:
 					panic("The path was neither right nor left!")
 				}
 
+				foundLoop := foundLoops[i]
+				foundEnd := foundEnds[i]
+				// if we've found the loop already, no need to increment the counter
+				if foundEnd && !foundLoop {
+					// increment the loop counter
+					loopCounts[i] += 1
+				}
 				// if we find the end, set that we've found a loop and don't increment the counter
 				if node[2] == 'Z' {
-					foundLoops[i] = true
-					continue
+					if foundEnd {
+						foundLoops[i] = true
+					}
+					foundEnds[i] = true
 				}
-				// increment the loop counter
-				loopCounts[i] += 1
+
 			}
 
 			// if we have counted all the loops then we are done!
