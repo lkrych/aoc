@@ -9,8 +9,9 @@ import (
 )
 
 type Node struct {
-	left  string
-	right string
+	left      string
+	right     string
+	foundLoop bool
 }
 
 func removeChars(s string, charsToRemove string) string {
@@ -93,6 +94,31 @@ func Part1() {
 	fmt.Println("Steps taken: ", stepsTaken)
 }
 
+// euclidian algorithm
+func gcd(a, b int) int {
+	for b != 0 {
+		t := b
+		b = a % b
+		a = t
+	}
+	return a
+}
+
+// Function to find the Least Common Multiple (LCM) of two numbers
+func lcm(a, b int) int {
+	return a / gcd(a, b) * b // Ensure the multiplication does not overflow
+}
+
+// Function to find the LCM of an array of numbers
+func lcmOfArray(arr []int) int {
+	fmt.Println("LCM of: ", arr)
+	result := arr[0]
+	for i := 1; i < len(arr); i++ {
+		result = lcm(result, arr[i])
+	}
+	return result
+}
+
 func Part2() {
 	// BOILERPLATE for getting file name from stdIn and reading line by line
 	filename := flag.String("f", "", "input file")
@@ -137,13 +163,20 @@ func Part2() {
 		}
 	}
 	fmt.Println("Starting nodes: ", startingNodes)
+	// Allocate a new slice with the same length as the original
 	pathEls := strings.Split(path, "")
-	stepsTaken := 0
+	loopCounts := make([]int, len(startingNodes))
+	foundLoops := make([]bool, len(startingNodes))
 
-ForeverLoop: //label for forever loop
+OuterLoop:
 	for {
 		for _, el := range pathEls {
 			for i, node := range startingNodes {
+				foundLoop := foundLoops[i]
+				// if we've found the loop already, no need to increment the counter
+				if foundLoop {
+					continue
+				}
 				currentStep := node
 				currentStepNode := graph[currentStep]
 				if el == "R" {
@@ -153,25 +186,35 @@ ForeverLoop: //label for forever loop
 				} else {
 					panic("The path was neither right nor left!")
 				}
-			}
-			// fmt.Println("step: ", startingNodes)
-			stepsTaken += 1
-			// check if we can escape
-			allTrue := true
-			for _, node := range startingNodes {
-				if node[2] != 'Z' {
-					allTrue = false
+
+				// if we find the end, set that we've found a loop and don't increment the counter
+				if node[2] == 'Z' {
+					foundLoops[i] = true
+					continue
 				}
+				// increment the loop counter
+				loopCounts[i] += 1
 			}
-			if allTrue {
-				break ForeverLoop
+
+			// if we have counted all the loops then we are done!
+			foundAllLoops := true
+			for _, fl := range foundLoops {
+				foundAllLoops = fl
+			}
+
+			if foundAllLoops {
+				break OuterLoop
 			}
 		}
 	}
+
+	// find the LCM of all the loops
+
+	lcm := lcmOfArray(loopCounts)
 
 	if scanner.Err() != nil {
 		panic(scanner.Err())
 	}
 
-	fmt.Println("Steps taken: ", stepsTaken)
+	fmt.Println("Steps taken: ", lcm)
 }
