@@ -119,6 +119,15 @@ func lcmOfArray(arr []int) int {
 	return result
 }
 
+func allTrue(elements []bool) bool {
+	for _, element := range elements {
+		if !element {
+			return false // Found a false element, return false immediately
+		}
+	}
+	return true // All elements were true
+}
+
 func Part2() {
 	// BOILERPLATE for getting file name from stdIn and reading line by line
 	filename := flag.String("f", "", "input file")
@@ -167,12 +176,19 @@ func Part2() {
 	pathEls := strings.Split(path, "")
 	loopCounts := make([]int, len(startingNodes))
 	foundLoops := make([]bool, len(startingNodes))
-	foundEnds := make([]bool, len(startingNodes))
+
+	nextNodes := make([]string, len(startingNodes))
+	copy(nextNodes, startingNodes)
 
 OuterLoop:
 	for {
+		// iterate over each path decision
 		for _, el := range pathEls {
-			for i, node := range startingNodes {
+			// iterate over each ghost position
+			for i, node := range nextNodes {
+				// fmt.Println(i)
+				// fmt.Println(loopCounts)
+				//Overwite the index of with the next Node
 				currentStep := node
 				currentStepNode := graph[currentStep]
 				if el == "R" {
@@ -182,35 +198,32 @@ OuterLoop:
 				} else {
 					panic("The path was neither right nor left!")
 				}
+				// if we find the end, set that we've found a loop and don't increment the counter
+				if node[2] == 'Z' {
+					fmt.Println("Found an end node for ", i)
+					foundLoops[i] = true
+					fmt.Println(foundLoops)
+				}
 
+				// fmt.Println(node)
+				// fmt.Println(loopCounts)
 				foundLoop := foundLoops[i]
-				foundEnd := foundEnds[i]
 				// if we've found the loop already, no need to increment the counter
-				if foundEnd && !foundLoop {
+				if !foundLoop {
 					// increment the loop counter
 					loopCounts[i] += 1
 				}
-				// if we find the end, set that we've found a loop and don't increment the counter
-				if node[2] == 'Z' {
-					if foundEnd {
-						foundLoops[i] = true
-					}
-					foundEnds[i] = true
-				}
 
 			}
 
-			// if we have counted all the loops then we are done!
-			foundAllLoops := true
-			for _, fl := range foundLoops {
-				foundAllLoops = fl
-			}
+			copy(nextNodes, startingNodes)
 
-			if foundAllLoops {
+			if allTrue(foundLoops) {
 				break OuterLoop
 			}
 		}
 	}
+	fmt.Println("Loops: ", loopCounts)
 
 	// find the LCM of all the loops
 
