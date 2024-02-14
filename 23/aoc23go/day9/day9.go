@@ -23,18 +23,23 @@ func convertStringListToInt(l []string) []int {
 }
 
 func findDiffs(l []int) (diffs []int) {
+	// fmt.Println("Finding diff of : ", l)
 	for i := 0; i < len(l)-1; i++ {
 		d := l[i+1] - l[i]
 		diffs = append(diffs, d)
 	}
+	// fmt.Println("diffs: ", diffs)
+	// fmt.Println()
 	return
 }
 
-func sumOf(l []int) (sum int) {
+func allZeroes(l []int) bool {
 	for _, el := range l {
-		sum += el
+		if el != 0 {
+			return false
+		}
 	}
-	return
+	return true
 }
 
 func findDiffSum(l []int) (sum int) {
@@ -44,7 +49,7 @@ func findDiffSum(l []int) (sum int) {
 	for {
 		l = findDiffs(l)
 		diffs = append(diffs, l)
-		if sumOf(l) == 0 {
+		if allZeroes(l) {
 			break
 		}
 	}
@@ -53,7 +58,7 @@ func findDiffSum(l []int) (sum int) {
 	for i := len(diffs) - 1; i >= 0; i-- {
 		diff := diffs[i]
 		lastEl = diff[len(diff)-1] + lastEl
-		fmt.Println("Last el of :", diff, " is ", lastEl)
+		// fmt.Println("Last el of :", diff, " is ", lastEl)
 	}
 
 	return lastEl
@@ -77,7 +82,7 @@ func Part1() {
 	sum := 0
 	for scanner.Scan() {
 		line := scanner.Text()
-		splitLine := strings.Split(line, " ")
+		splitLine := strings.Split(strings.TrimSpace(line), " ")
 		ints := convertStringListToInt(splitLine)
 		sum += findDiffSum(ints)
 	}
