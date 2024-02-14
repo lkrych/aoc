@@ -93,3 +93,55 @@ func Part1() {
 
 	fmt.Println("The sum of the patterns is: ", sum)
 }
+
+func findDiffSumBackward(l []int) (sum int) {
+	diffs := [][]int{
+		l,
+	}
+	for {
+		l = findDiffs(l)
+		diffs = append(diffs, l)
+		if allZeroes(l) {
+			break
+		}
+	}
+	// walk backwards through the diffs
+	firstEl := 0
+	for i := len(diffs) - 1; i >= 0; i-- {
+		diff := diffs[i]
+		firstEl = diff[0] - firstEl
+		// fmt.Println("Last el of :", diff, " is ", lastEl)
+	}
+
+	return firstEl
+}
+
+func Part2() {
+	// BOILERPLATE for getting file name from stdIn and reading line by line
+	filename := flag.String("f", "", "input file")
+	// Parse the command-line arguments to read the flag value
+	flag.Parse()
+	filepath := fmt.Sprintf("../input/%s", *filename)
+	scanner, err := input.ReadInputFile(filepath)
+	if err != nil {
+		panic(err)
+	}
+	defer scanner.Scan() // Close the file when done reading
+
+	// BEGIN CODING FOR DAY HERE
+	// INITIALIZE GLOBAL VALUES
+
+	sum := 0
+	for scanner.Scan() {
+		line := scanner.Text()
+		splitLine := strings.Split(strings.TrimSpace(line), " ")
+		ints := convertStringListToInt(splitLine)
+		sum += findDiffSumBackward(ints)
+	}
+
+	if scanner.Err() != nil {
+		panic(scanner.Err())
+	}
+
+	fmt.Println("The sum of the patterns is: ", sum)
+}
